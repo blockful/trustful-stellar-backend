@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Community {
+  contractAddress String   @id
+  factoryAddress  String
+  name            String
+  description     String
+  creatorAddress  String
+  isHidden        Boolean
+  blocktimestamp  DateTime
+  totalBadges     Int
+  lasIndexedAt    DateTime @updatedAt
+
+  // Relations
+  members  CommunityMember[]
+  managers CommunityManager[]
+}
+
+model User {
+  userAddress String @id
+
+  // Relations
+  communities CommunityMember[]
+}
+
+model CommunityMember {
+  id              Int      @id @default(autoincrement())
+  userAddress     String
+  isManager       Boolean  @default(false)
+  isCreator       Boolean  @default(false)
+  contractAddress String
+  lastIndexedAt   DateTime @updatedAt
+
+  // Relations
+  community Community @relation(fields: [contractAddress], references: [contractAddress])
+  user      User      @relation(fields: [userAddress], references: [userAddress])
+}
+
+model CommunityManager {
+  id              Int    @id @default(autoincrement())
+  managerAddress  String
+  contractAddress String
+
+  // Relations
+  community Community @relation(fields: [contractAddress], references: [contractAddress])
+}
