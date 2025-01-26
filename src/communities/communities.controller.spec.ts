@@ -2,7 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CommunitiesController } from './communities.controller';
 import { CommunitiesService } from './communities.service';
 import { CreateCommunityDto } from './dto/create-community.dto';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { NotFoundException } from '@nestjs/common';
 
 describe('CommunitiesController', () => {
   let controller: CommunitiesController;
@@ -37,6 +38,13 @@ describe('CommunitiesController', () => {
           provide: CommunitiesService,
           useValue: {
             findAll: jest.fn().mockResolvedValue(mockCommunities),
+            findOne: jest.fn().mockImplementation((contractAddress) => {
+              return Promise.resolve(
+                mockCommunities.find(
+                  (c) => c.contractAddress === contractAddress,
+                ) || null,
+              );
+            }),
           },
         },
         {
@@ -59,6 +67,55 @@ describe('CommunitiesController', () => {
       const result = await controller.findAll();
       expect(result).toEqual(mockCommunities);
       expect(service.findAll).toHaveBeenCalled();
+    });
+
+    it('should return an empty array when no communities exist', async () => {
+      jest.spyOn(service, 'findAll').mockResolvedValueOnce([]);
+      const result = await controller.findAll();
+      expect(result).toEqual([]);
+      expect(service.findAll).toHaveBeenCalled();
+    });
+  });
+
+  describe('findOne', () => {
+    const validContractAddress =
+      'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA';
+
+    it('should return a single community when given a valid contract address', async () => {
+      const result = await controller.findOne(validContractAddress);
+      expect(result).toEqual(mockCommunities[0]);
+      expect(service.findOne).toHaveBeenCalledWith(validContractAddress);
+    });
+
+    it('should throw NotFoundException when community is not found', async () => {
+      const invalidAddress = 'INVALID_ADDRESS';
+      jest.spyOn(service, 'findOne').mockResolvedValueOnce(null);
+
+      await expect(controller.findOne(invalidAddress)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(service.findOne).toHaveBeenCalledWith(invalidAddress);
+    });
+
+    it('should handle special characters in contract address', async () => {
+      const specialAddress =
+        'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAA...';
+      jest.spyOn(service, 'findOne').mockResolvedValueOnce(null);
+
+      await expect(controller.findOne(specialAddress)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(service.findOne).toHaveBeenCalledWith(specialAddress);
+    });
+  });
+
+  describe('error handling', () => {
+    it('should handle service errors gracefully', async () => {
+      jest
+        .spyOn(service, 'findAll')
+        .mockRejectedValueOnce(new Error('Database error'));
+
+      await expect(controller.findAll()).rejects.toThrow('Database error');
     });
   });
 });

@@ -1,7 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { UpdateCommunityDto } from './dto/update-community.dto';
 
 @Injectable()
 export class CommunitiesService {
@@ -40,5 +39,44 @@ export class CommunitiesService {
       totalMembers: community._count.members,
       managers: community.managers.map((manager) => manager.managerAddress),
     }));
+  }
+
+  async findOne(contractAddress: string): Promise<CreateCommunityDto> {
+    const community = await this.prisma.community.findUnique({
+      where: {
+        contractAddress,
+      },
+      include: {
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+        managers: {
+          select: {
+            managerAddress: true,
+          },
+        },
+      },
+    });
+
+    if (!community) {
+      throw new NotFoundException(
+        `Community with contract address ${contractAddress} not found`,
+      );
+    }
+
+    return {
+      contractAddress: community.contractAddress,
+      factoryAddress: community.factoryAddress,
+      name: community.name,
+      description: community.description,
+      creatorAddress: community.creatorAddress,
+      isHidden: community.isHidden,
+      blocktimestamp: community.blocktimestamp,
+      totalBadges: community.totalBadges,
+      totalMembers: community._count.members,
+      managers: community.managers.map((manager) => manager.managerAddress),
+    };
   }
 }

@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommunitiesService } from './communities.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotFoundException } from '@nestjs/common';
 
 describe('CommunitiesService', () => {
   let service: CommunitiesService;
@@ -97,6 +98,62 @@ describe('CommunitiesService', () => {
           isHidden: false,
         },
       });
+    });
+  });
+
+  describe('findOne', () => {
+    const contractAddress =
+      'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA';
+
+    it('should return a specific community', async () => {
+      prismaService.community.findUnique = jest.fn().mockResolvedValue({
+        ...mockPrismaResponse,
+        _count: {
+          members: 5,
+        },
+      });
+
+      const result = await service.findOne(contractAddress);
+
+      expect(result).toEqual({
+        contractAddress,
+        factoryAddress: mockPrismaResponse.factoryAddress,
+        name: mockPrismaResponse.name,
+        description: mockPrismaResponse.description,
+        creatorAddress: mockPrismaResponse.creatorAddress,
+        isHidden: mockPrismaResponse.isHidden,
+        blocktimestamp: expect.any(Date),
+        totalBadges: mockPrismaResponse.totalBadges,
+        totalMembers: 5,
+        managers: [
+          'GDUMR3GDVKYMABGVOQHVKNWMXHVYKZLTWWQZCDZV7GZVWPJVJAXKHXFX',
+          'GDZAP3QWXBZAPILZBCJ5LYIJYVXZSNJ4WCYCNHBQPQHCJX2RNXRUMMZN',
+        ],
+      });
+
+      expect(prismaService.community.findUnique).toHaveBeenCalledWith({
+        where: { contractAddress },
+        include: {
+          _count: {
+            select: {
+              members: true,
+            },
+          },
+          managers: {
+            select: {
+              managerAddress: true,
+            },
+          },
+        },
+      });
+    });
+
+    it('should throw NotFoundException when community not found', async () => {
+      prismaService.community.findUnique = jest.fn().mockResolvedValue(null);
+
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });
