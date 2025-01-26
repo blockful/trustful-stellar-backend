@@ -156,4 +156,39 @@ describe('CommunitiesService', () => {
       );
     });
   });
+
+  describe('updateVisibility', () => {
+    const contractAddress =
+      'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA';
+
+    it('should update community visibility', async () => {
+      const updatedMockResponse = {
+        ...mockPrismaResponse,
+        isHidden: true,
+      };
+
+      prismaService.community.update = jest
+        .fn()
+        .mockResolvedValue(updatedMockResponse);
+
+      const result = await service.updateVisibility(contractAddress, true);
+
+      expect(result.isHidden).toBe(true);
+      expect(prismaService.community.update).toHaveBeenCalledWith({
+        where: { contractAddress },
+        data: { isHidden: true },
+        include: expect.any(Object),
+      });
+    });
+
+    it('should throw NotFoundException when community not found', async () => {
+      prismaService.community.update = jest.fn().mockRejectedValue({
+        code: 'P2025',
+      });
+
+      await expect(
+        service.updateVisibility(contractAddress, true),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
 });

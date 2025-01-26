@@ -146,4 +146,25 @@ describe('Communities (e2e)', () => {
         });
     });
   });
+  describe('/communities/:contractAddress/visibility (PATCH)', () => {
+    it('should update community visibility status', async () => {
+      return request(app.getHttpServer())
+        .patch(`/communities/${mockCommunity.contractAddress}/visibility`)
+        .send({ isHidden: true })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body.isHidden).toBe(true);
+          expect(res.body.contractAddress).toBe(mockCommunity.contractAddress);
+        });
+    });
+
+    it('should return 404 when community not found', () => {
+      const nonExistentAddress = 'NONEXISTENTADDRESS';
+
+      return request(app.getHttpServer())
+        .patch(`/communities/${nonExistentAddress}/visibility`)
+        .send({ isHidden: true })
+        .expect(404);
+    });
+  });
 });

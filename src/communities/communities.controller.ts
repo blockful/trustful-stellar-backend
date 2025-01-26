@@ -1,7 +1,15 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Patch,
+  Param,
+  Body,
+  NotFoundException,
+  Get,
+} from '@nestjs/common';
 import { CommunitiesService } from './communities.service';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { UpdateHiddenStatusDto } from './dto/update-hidden-status.dto';
 
 @Controller('communities')
 export class CommunitiesController {
@@ -43,5 +51,35 @@ export class CommunitiesController {
       throw new NotFoundException('Community not found');
     }
     return community;
+  }
+
+  @Patch(':contractAddress/visibility')
+  @ApiOperation({ summary: 'Update community visibility status' })
+  @ApiParam({
+    name: 'contractAddress',
+    description: 'Soroban contract address of the community',
+    example:
+      'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Community visibility status updated successfully',
+    type: CreateCommunityDto,
+  })
+  @ApiResponse({ status: 404, description: 'Community not found' })
+  async updateVisibility(
+    @Param('contractAddress') contractAddress: string,
+    @Body() updateHiddenStatusDto: UpdateHiddenStatusDto,
+  ): Promise<CreateCommunityDto> {
+    const updatedCommunity = await this.communitiesService.updateVisibility(
+      contractAddress,
+      updateHiddenStatusDto.isHidden,
+    );
+
+    if (!updatedCommunity) {
+      throw new NotFoundException('Community not found');
+    }
+
+    return updatedCommunity;
   }
 }
