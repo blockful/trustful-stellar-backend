@@ -10,16 +10,22 @@ describe('CommunitiesController', () => {
 
   const mockCommunities: CreateCommunityDto[] = [
     {
-      contractAddress: 'CB5DQK...',
-      factoryAddress: 'CCYDNAOV...',
+      contractAddress:
+        'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+      factoryAddress:
+        'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
       name: 'Test Community',
       description: 'Test Description',
-      creatorAddress: 'GBVNNPO...',
+      creatorAddress:
+        'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY...',
       isHidden: false,
       blocktimestamp: new Date(),
       totalBadges: 10,
       totalMembers: 5,
-      managers: ['GDUMR...', 'GDZAP3...'],
+      managers: [
+        'GDUMR3GDVKYMABGVOQHVKNWMXHVYKZLTWWQZCDZV7GZVWPJVJAXKHXFX',
+        'GDZAP3QWXBZAPILZBCJ5LYIJYVXZSNJ4WCYCNHBQPQHCJX2RNXRUMMZN',
+      ],
     },
   ];
 

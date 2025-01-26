@@ -1,24 +1,35 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CommunitiesService } from './communities.service';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 describe('CommunitiesService', () => {
   let service: CommunitiesService;
   let prismaService: PrismaService;
 
   const mockPrismaResponse = {
-    contractAddress: 'CB5DQK...',
-    factoryAddress: 'CCYDNAOV...',
+    contractAddress:
+      'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+    factoryAddress:
+      'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
     name: 'Test Community',
     description: 'Test Description',
-    creatorAddress: 'GBVNNPO...',
+    creatorAddress: 'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
     isHidden: false,
     blocktimestamp: new Date(),
     totalBadges: 10,
     _count: {
       members: 5,
     },
-    managers: [{ managerAddress: 'GDUMR...' }, { managerAddress: 'GDZAP3...' }],
+    managers: [
+      {
+        managerAddress:
+          'GDUMR3GDVKYMABGVOQHVKNWMXHVYKZLTWWQZCDZV7GZVWPJVJAXKHXFX',
+      },
+      {
+        managerAddress:
+          'GDZAP3QWXBZAPILZBCJ5LYIJYVXZSNJ4WCYCNHBQPQHCJX2RNXRUMMZN',
+      },
+    ],
   };
 
   beforeEach(async () => {
@@ -50,16 +61,22 @@ describe('CommunitiesService', () => {
 
       expect(result).toEqual([
         {
-          contractAddress: '0x123',
-          factoryAddress: '0x456',
+          contractAddress:
+            'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+          factoryAddress:
+            'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
           name: 'Test Community',
           description: 'Test Description',
-          creatorAddress: '0x789',
+          creatorAddress:
+            'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
           isHidden: false,
           blocktimestamp: expect.any(Date),
           totalBadges: 10,
           totalMembers: 5,
-          managers: ['0xabc', '0xdef'],
+          managers: [
+            'GDUMR3GDVKYMABGVOQHVKNWMXHVYKZLTWWQZCDZV7GZVWPJVJAXKHXFX',
+            'GDZAP3QWXBZAPILZBCJ5LYIJYVXZSNJ4WCYCNHBQPQHCJX2RNXRUMMZN',
+          ],
         },
       ]);
 

@@ -10,11 +10,13 @@ describe('Communities (e2e)', () => {
   let prismaService: PrismaService;
 
   const mockCommunity = {
-    contractAddress: 'CB5DQK...',
-    factoryAddress: 'CCYDNAOV...',
+    contractAddress:
+      'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+    factoryAddress:
+      'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
     name: 'Test Community',
     description: 'Test Description',
-    creatorAddress: 'GBVNNPO...',
+    creatorAddress: 'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
     isHidden: false,
     blocktimestamp: new Date(),
     totalBadges: 10,
@@ -22,12 +24,22 @@ describe('Communities (e2e)', () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule, PrismaModule],
-      providers: [PrismaService],
+      imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
     prismaService = moduleFixture.get<PrismaService>(PrismaService);
+
+    // Run migrations
+    await prismaService.$executeRaw`CREATE SCHEMA IF NOT EXISTS public`;
+    await prismaService.$executeRaw`DROP SCHEMA IF EXISTS public CASCADE`;
+    await prismaService.$executeRaw`CREATE SCHEMA public`;
+    await prismaService.$executeRaw`SET search_path TO public`;
+
+    // Run your Prisma migrations
+    const { execSync } = require('child_process');
+    execSync('npx prisma migrate deploy');
+
     await app.init();
   });
 
