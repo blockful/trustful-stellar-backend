@@ -22,7 +22,7 @@ model Community {
   isHidden        Boolean
   blocktimestamp  DateTime
   totalBadges     Int
-  lasIndexedAt    DateTime @updatedAt
+  lastIndexedAt    DateTime @updatedAt
 
   // Relations
   members  CommunityMember[]
