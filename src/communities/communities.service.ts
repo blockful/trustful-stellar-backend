@@ -79,4 +79,54 @@ export class CommunitiesService {
       managers: community.managers.map((manager) => manager.managerAddress),
     };
   }
+
+  async updateVisibility(
+    contractAddress: string,
+    isHidden: boolean,
+  ): Promise<CreateCommunityDto> {
+    try {
+      const updatedCommunity = await this.prisma.community.update({
+        where: {
+          contractAddress,
+        },
+        data: {
+          isHidden,
+        },
+        include: {
+          _count: {
+            select: {
+              members: true,
+            },
+          },
+          managers: {
+            select: {
+              managerAddress: true,
+            },
+          },
+        },
+      });
+
+      return {
+        contractAddress: updatedCommunity.contractAddress,
+        factoryAddress: updatedCommunity.factoryAddress,
+        name: updatedCommunity.name,
+        description: updatedCommunity.description,
+        creatorAddress: updatedCommunity.creatorAddress,
+        isHidden: updatedCommunity.isHidden,
+        blocktimestamp: updatedCommunity.blocktimestamp,
+        totalBadges: updatedCommunity.totalBadges,
+        totalMembers: updatedCommunity._count.members,
+        managers: updatedCommunity.managers.map(
+          (manager) => manager.managerAddress,
+        ),
+      };
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(
+          `Community with address ${contractAddress} not found`,
+        );
+      }
+      throw error;
+    }
+  }
 }

@@ -118,4 +118,35 @@ describe('CommunitiesController', () => {
       await expect(controller.findAll()).rejects.toThrow('Database error');
     });
   });
+  describe('updateVisibility', () => {
+    const contractAddress =
+      'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA';
+
+    beforeEach(() => {
+      service.updateVisibility = jest.fn().mockResolvedValue({
+        ...mockCommunities[0],
+        isHidden: true,
+      });
+    });
+
+    it('should update community visibility', async () => {
+      const result = await controller.updateVisibility(contractAddress, {
+        isHidden: true,
+      });
+
+      expect(result.isHidden).toBe(true);
+      expect(service.updateVisibility).toHaveBeenCalledWith(
+        contractAddress,
+        true,
+      );
+    });
+
+    it('should throw NotFoundException when community not found', async () => {
+      service.updateVisibility = jest.fn().mockResolvedValue(null);
+
+      await expect(
+        controller.updateVisibility(contractAddress, { isHidden: true }),
+      ).rejects.toThrow(NotFoundException);
+    });
+  });
 });
