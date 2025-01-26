@@ -3,7 +3,9 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from './../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { PrismaModule } from '../src/prisma/prisma.module';
+import * as dotenv from 'dotenv';
+
+dotenv.config({ path: '.env.test' });
 
 describe('Communities (e2e)', () => {
   let app: INestApplication;
