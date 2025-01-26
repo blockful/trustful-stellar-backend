@@ -1,0 +1,44 @@
+import { Injectable } from '@nestjs/common';
+import { CreateCommunityDto } from './dto/create-community.dto';
+import { PrismaService } from '../prisma/prisma.service';
+import { UpdateCommunityDto } from './dto/update-community.dto';
+
+@Injectable()
+export class CommunitiesService {
+  constructor(private prisma: PrismaService) {}
+
+  async findAll(): Promise<CreateCommunityDto[]> {
+    const communities = await this.prisma.community.findMany({
+      include: {
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+
+        managers: {
+          select: {
+            managerAddress: true,
+          },
+        },
+      },
+      where: {
+        isHidden: false,
+      },
+    });
+
+    // Transform the data to match our DTO
+    return communities.map((community) => ({
+      contractAddress: community.contractAddress,
+      factoryAddress: community.factoryAddress,
+      name: community.name,
+      description: community.description,
+      creatorAddress: community.creatorAddress,
+      isHidden: community.isHidden,
+      blocktimestamp: community.blocktimestamp,
+      totalBadges: community.totalBadges,
+      totalMembers: community._count.members,
+      managers: community.managers.map((manager) => manager.managerAddress),
+    }));
+  }
+}
