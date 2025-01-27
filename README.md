@@ -68,6 +68,12 @@ npx prisma studio
 
 ### Available Endpoints
 
+To access the Swagger documentation, enter the link with the application running:
+
+```bash
+http://localhost:3000/api
+```
+
 1. Get All Communities
 
 ```bash
