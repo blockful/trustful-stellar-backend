@@ -153,4 +153,13 @@ export class CommunitiesController {
 
     return updatedCommunity;
   }
+
+  @Get(':contractAddress/members')
+  @ApiOperation({
+    summary: 'Get community members',
+    description: 'Retrieves all members of a specific community'
+  })
+  async getMembers(@Param('contractAddress') contractAddress: string) {
+    return this.communitiesService.findMembers(contractAddress);
+  }
 }

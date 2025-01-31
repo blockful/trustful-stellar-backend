@@ -129,4 +129,23 @@ export class CommunitiesService {
       throw error;
     }
   }
+
+  async findMembers(contractAddress: string) {
+    const members = await this.prisma.communityMember.findMany({
+      where: {
+        contractAddress: contractAddress
+      },
+      include: {
+        user: true
+      }
+    });
+
+    if (!members.length) {
+      throw new NotFoundException(
+        `No members found for community ${contractAddress}`
+      );
+    }
+
+    return members;
+  }
 }
