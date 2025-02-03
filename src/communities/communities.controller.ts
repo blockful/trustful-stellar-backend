@@ -10,6 +10,7 @@ import { CommunitiesService } from './communities.service';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { UpdateHiddenStatusDto } from './dto/update-hidden-status.dto';
+import { BadgeDto } from './dto/badge.dto';
 
 @Controller('communities')
 export class CommunitiesController {
@@ -152,5 +153,28 @@ export class CommunitiesController {
     }
 
     return updatedCommunity;
+  }
+
+  @Get(':contractAddress/members')
+  @ApiOperation({
+    summary: 'Get community members',
+    description: 'Retrieves all members of a specific community'
+  })
+  async getMembers(@Param('contractAddress') contractAddress: string) {
+    return this.communitiesService.findMembers(contractAddress);
+  }
+
+  @Get(':contractAddress/badges')
+  @ApiOperation({
+    summary: 'Get community badges',
+    description: 'Retrieves all badges from a specific community'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of badges retrieved successfully',
+    type: [BadgeDto]
+  })
+  async getBadges(@Param('contractAddress') contractAddress: string) {
+    return this.communitiesService.findBadges(contractAddress);
   }
 }
