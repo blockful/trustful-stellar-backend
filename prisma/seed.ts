@@ -94,6 +94,21 @@ async function main() {
         }),
       );
 
+      // Após criar a community, adicione badges
+      const badgeCount = faker.number.int({ min: 2, max: 5 });
+      await Promise.all(
+        Array.from({ length: badgeCount }).map(async () => {
+          return await prisma.badge.create({
+            data: {
+              issuer: generateAddress(),
+              contractAddress: community.contractAddress,
+              name: faker.company.buzzNoun(),
+              score: faker.number.int({ min: 1, max: 100 })
+            }
+          });
+        })
+      );
+
       return community;
     }),
   );

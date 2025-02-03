@@ -22,11 +22,12 @@ model Community {
   isHidden        Boolean
   blocktimestamp  DateTime
   totalBadges     Int
-  lastIndexedAt    DateTime @updatedAt
+  lastIndexedAt   DateTime @updatedAt
 
   // Relations
   members  CommunityMember[]
   managers CommunityManager[]
+  badges   Badge[]
 }
 
 model User {
@@ -56,4 +57,16 @@ model CommunityManager {
 
   // Relations
   community Community @relation(fields: [contractAddress], references: [contractAddress])
+}
+
+model Badge {
+  issuer          String
+  contractAddress String
+  name            String
+  score           Int
+
+  // Relations
+  community       Community @relation(fields: [contractAddress], references: [contractAddress])
+
+  @@id([issuer, contractAddress])
 }

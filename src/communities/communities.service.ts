@@ -148,4 +148,20 @@ export class CommunitiesService {
 
     return members;
   }
+
+  async findBadges(contractAddress: string) {
+    const badges = await this.prisma.badge.findMany({
+      where: {
+        contractAddress: contractAddress
+      }
+    });
+
+    if (!badges.length) {
+      throw new NotFoundException(
+        `No badges found for community ${contractAddress}`
+      );
+    }
+
+    return badges;
+  }
 }
