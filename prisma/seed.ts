@@ -42,6 +42,7 @@ async function main() {
     Array.from({ length: 10 }).map(async () => {
       const contractAddress = generateAddress();
       const creatorAddress = faker.helpers.arrayElement(users).userAddress;
+      const totalBadges = faker.number.int({ min: 1, max: 10 });
 
       // Create the community
       const community = await prisma.community.create({
@@ -53,13 +54,13 @@ async function main() {
           creatorAddress: creatorAddress,
           isHidden: faker.datatype.boolean(),
           blocktimestamp: generateRecentTimestamp(),
-          totalBadges: faker.number.int({ min: 0, max: 100 }),
+          totalBadges: totalBadges,
           lastIndexedAt: new Date(),
         },
       });
 
       // Add some members to the community
-      const memberCount = faker.number.int({ min: 5, max: 15 });
+      const memberCount = faker.number.int({ min: 1, max: 15 });
       const selectedUsers = faker.helpers.arrayElements(users, memberCount);
 
       await Promise.all(
@@ -95,9 +96,8 @@ async function main() {
       );
 
       // Após criar a community, adicione badges
-      const badgeCount = faker.number.int({ min: 2, max: 5 });
       await Promise.all(
-        Array.from({ length: badgeCount }).map(async () => {
+        Array.from({ length: totalBadges }).map(async () => {
           return await prisma.badge.create({
             data: {
               issuer: generateAddress(),
