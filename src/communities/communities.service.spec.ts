@@ -42,6 +42,14 @@ describe('CommunitiesService', () => {
           useValue: {
             community: {
               findMany: jest.fn().mockResolvedValue([mockPrismaResponse]),
+              findUnique: jest.fn(),
+              update: jest.fn(),
+            },
+            communityMember: {
+              findMany: jest.fn(),
+            },
+            badge: {
+              findMany: jest.fn(),
             },
           },
         },
@@ -189,6 +197,193 @@ describe('CommunitiesService', () => {
       await expect(
         service.updateVisibility(contractAddress, true),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('findMembers', () => {
+    const contractAddress = 'TEST_CONTRACT_ADDRESS';
+    const mockMembers = [
+      {
+        id: 1,
+        userAddress: 'USER_1',
+        isManager: true,
+        isCreator: true,
+        contractAddress,
+        lastIndexedAt: new Date(),
+        user: {
+          userAddress: 'USER_1'
+        }
+      },
+      {
+        id: 2,
+        userAddress: 'USER_2',
+        isManager: false,
+        isCreator: false,
+        contractAddress,
+        lastIndexedAt: new Date(),
+        user: {
+          userAddress: 'USER_2'
+        }
+      }
+    ];
+
+    beforeEach(() => {
+      prismaService.communityMember.findMany = jest.fn().mockResolvedValue(mockMembers);
+    });
+
+    it('should return all members of a community', async () => {
+      const result = await service.findMembers(contractAddress);
+
+      expect(result).toEqual(mockMembers);
+      expect(prismaService.communityMember.findMany).toHaveBeenCalledWith({
+        where: { contractAddress },
+        include: { user: true }
+      });
+    });
+
+    it('should throw NotFoundException when no members are found', async () => {
+      prismaService.communityMember.findMany = jest.fn().mockResolvedValue([]);
+
+      await expect(service.findMembers(contractAddress))
+        .rejects
+        .toThrow(NotFoundException);
+    });
+  });
+
+  describe('findBadges', () => {
+    const contractAddress = 'TEST_CONTRACT_ADDRESS';
+    const mockBadges = [
+      {
+        issuer: 'ISSUER_1',
+        contractAddress,
+        name: 'Badge 1',
+        score: 100
+      },
+      {
+        issuer: 'ISSUER_2',
+        contractAddress,
+        name: 'Badge 2',
+        score: 50
+      }
+    ];
+
+    beforeEach(() => {
+      prismaService.badge.findMany = jest.fn().mockResolvedValue(mockBadges);
+    });
+
+    it('should return all badges of a community', async () => {
+      const result = await service.findBadges(contractAddress);
+
+      expect(result).toEqual(mockBadges);
+      expect(prismaService.badge.findMany).toHaveBeenCalledWith({
+        where: { contractAddress }
+      });
+    });
+
+    it('should throw NotFoundException when no badges are found', async () => {
+      prismaService.badge.findMany = jest.fn().mockResolvedValue([]);
+
+      await expect(service.findBadges(contractAddress))
+        .rejects
+        .toThrow(NotFoundException);
+    });
+  });
+
+  describe('findCreatedCommunities', () => {
+    const userAddress = 'TEST_USER_ADDRESS';
+    const mockCommunities = [
+      {
+        contractAddress: 'CONTRACT_1',
+        name: 'Community 1',
+        creatorAddress: userAddress
+      },
+      {
+        contractAddress: 'CONTRACT_2',
+        name: 'Community 2',
+        creatorAddress: userAddress
+      }
+    ];
+
+    beforeEach(() => {
+      prismaService.community.findMany = jest.fn().mockResolvedValue(mockCommunities);
+    });
+
+    it('should return all communities created by a user', async () => {
+      const result = await service.findCreatedCommunities(userAddress);
+
+      expect(result).toEqual(mockCommunities);
+      expect(prismaService.community.findMany).toHaveBeenCalledWith({
+        where: { creatorAddress: userAddress }
+      });
+    });
+  });
+
+  describe('findHiddenCommunities', () => {
+    const userAddress = 'TEST_USER_ADDRESS';
+    const mockHiddenCommunities = [
+      {
+        contractAddress: 'CONTRACT_1',
+        name: 'Hidden Community 1',
+        creatorAddress: userAddress,
+        isHidden: true
+      }
+    ];
+
+    beforeEach(() => {
+      prismaService.community.findMany = jest.fn().mockResolvedValue(mockHiddenCommunities);
+    });
+
+    it('should return all hidden communities for a user', async () => {
+      const result = await service.findHiddenCommunities(userAddress);
+
+      expect(result).toEqual(mockHiddenCommunities);
+      expect(prismaService.community.findMany).toHaveBeenCalledWith({
+        where: {
+          creatorAddress: userAddress,
+          isHidden: true
+        }
+      });
+    });
+  });
+
+  describe('findJoinnedCommunities', () => {
+    const userAddress = 'TEST_USER_ADDRESS';
+    const mockCommunityAddresses = [
+      { contractAddress: 'CONTRACT_1' },
+      { contractAddress: 'CONTRACT_2' }
+    ];
+  
+    const mockCommunities = [
+      {
+        ...mockPrismaResponse,
+        contractAddress: 'CONTRACT_1'
+      },
+      {
+        ...mockPrismaResponse,
+        contractAddress: 'CONTRACT_2'
+      }
+    ];
+  
+    beforeEach(() => {
+      prismaService.communityMember.findMany = jest.fn().mockResolvedValue(mockCommunityAddresses);
+      prismaService.community.findMany = jest.fn().mockResolvedValue(mockCommunities);
+    });
+  
+    it('should return all communities joined by a user', async () => {
+      const result = await service.findJoinnedCommunities(userAddress);
+  
+      expect(result).toEqual(mockCommunities);
+      expect(prismaService.communityMember.findMany).toHaveBeenCalledWith({
+        where: { userAddress },
+        select: { contractAddress: true }
+      });
+      expect(prismaService.community.findMany).toHaveBeenCalledWith({
+        where: {
+          contractAddress: {
+            in: mockCommunityAddresses.map(community => community.contractAddress)
+          }
+        }
+      });
     });
   });
 });
