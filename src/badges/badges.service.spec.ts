@@ -67,7 +67,7 @@ describe('BadgesService', () => {
         name: 'New Badge',
         score: 100,
         issuer: '0x1234567890',
-        contractAddress: '0x1234567890',
+        communityAddress: '0x1234567890',
       };
 
       const mockCreatedBadge = {

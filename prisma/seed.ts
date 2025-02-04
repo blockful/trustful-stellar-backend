@@ -60,7 +60,7 @@ async function main() {
       // Create the community
       const community = await prisma.community.create({
         data: {
-          contractAddress: contractAddress,
+          communityAddress: contractAddress,
           factoryAddress: generateAddress(),
           name: faker.company.name(),
           description: faker.company.catchPhrase(),
@@ -84,7 +84,7 @@ async function main() {
           return await prisma.communityMember.create({
             data: {
               userAddress: user.userAddress,
-              contractAddress: community.contractAddress,
+              communityAddress: community.communityAddress,
               isManager: faker.datatype.boolean(),
               isCreator: user.userAddress === creatorAddress,
               lastIndexedAt: new Date(),
@@ -102,7 +102,7 @@ async function main() {
           return await prisma.communityManager.create({
             data: {
               managerAddress: user.userAddress,
-              contractAddress: community.contractAddress,
+              communityAddress: community.communityAddress,
             },
           });
         }),
@@ -114,7 +114,7 @@ async function main() {
           return await prisma.badge.create({
             data: {
               issuer: generateAddress(),
-              contractAddress: community.contractAddress,
+              communityAddress: community.communityAddress,
               name: faker.company.buzzNoun(),
               score: faker.number.int({ min: 1, max: 100 }),
               type: faker.helpers.arrayElement(['Custom', 'Stellar', 'Soroban'])

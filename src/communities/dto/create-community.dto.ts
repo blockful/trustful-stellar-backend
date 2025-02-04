@@ -11,7 +11,7 @@ export class CreateCommunityDto {
   @ApiProperty({ description: 'Soroban contract address for the community' })
   @IsNotEmpty()
   @IsString()
-  contractAddress: string;
+  communityAddress: string;
 
   @ApiProperty({ description: 'Soroban factory contract address' })
   @IsNotEmpty()

@@ -14,7 +14,7 @@ datasource db {
 }
 
 model Community {
-  contractAddress String   @id
+  communityAddress String   @id
   factoryAddress  String
   name            String
   description     String
@@ -42,32 +42,32 @@ model CommunityMember {
   userAddress     String
   isManager       Boolean  @default(false)
   isCreator       Boolean  @default(false)
-  contractAddress String
+  communityAddress String
   lastIndexedAt   DateTime @updatedAt
 
   // Relations
-  community Community @relation(fields: [contractAddress], references: [contractAddress])
+  community Community @relation(fields: [communityAddress], references: [communityAddress])
   user      User      @relation(fields: [userAddress], references: [userAddress])
 }
 
 model CommunityManager {
   id              Int    @id @default(autoincrement())
   managerAddress  String
-  contractAddress String
+  communityAddress String
 
   // Relations
-  community Community @relation(fields: [contractAddress], references: [contractAddress])
+  community Community @relation(fields: [communityAddress], references: [communityAddress])
 }
 
 model Badge {
   issuer          String
-  contractAddress String
+  communityAddress String
   name            String
   score           Int
   type            String
 
   // Relations
-  community       Community @relation(fields: [contractAddress], references: [contractAddress])
+  community       Community @relation(fields: [communityAddress], references: [communityAddress])
 
-  @@id([issuer, contractAddress])
+  @@id([issuer, communityAddress])
 }

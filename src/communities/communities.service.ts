@@ -28,7 +28,7 @@ export class CommunitiesService {
 
     // Transform the data to match our DTO
     return communities.map((community) => ({
-      contractAddress: community.contractAddress,
+      communityAddress: community.communityAddress,
       factoryAddress: community.factoryAddress,
       name: community.name,
       description: community.description,
@@ -41,10 +41,10 @@ export class CommunitiesService {
     }));
   }
 
-  async findOne(contractAddress: string): Promise<CreateCommunityDto> {
+  async findOne(communityAddress: string): Promise<CreateCommunityDto> {
     const community = await this.prisma.community.findUnique({
       where: {
-        contractAddress,
+        communityAddress,
       },
       include: {
         _count: {
@@ -62,12 +62,12 @@ export class CommunitiesService {
 
     if (!community) {
       throw new NotFoundException(
-        `Community with contract address ${contractAddress} not found`,
+          `Community with contract address ${communityAddress} not found`,
       );
     }
 
     return {
-      contractAddress: community.contractAddress,
+      communityAddress: community.communityAddress,
       factoryAddress: community.factoryAddress,
       name: community.name,
       description: community.description,
@@ -81,13 +81,13 @@ export class CommunitiesService {
   }
 
   async updateVisibility(
-    contractAddress: string,
+    communityAddress: string,
     isHidden: boolean,
   ): Promise<CreateCommunityDto> {
     try {
       const updatedCommunity = await this.prisma.community.update({
         where: {
-          contractAddress,
+          communityAddress,
         },
         data: {
           isHidden,
@@ -107,7 +107,7 @@ export class CommunitiesService {
       });
 
       return {
-        contractAddress: updatedCommunity.contractAddress,
+        communityAddress: updatedCommunity.communityAddress,
         factoryAddress: updatedCommunity.factoryAddress,
         name: updatedCommunity.name,
         description: updatedCommunity.description,
@@ -123,17 +123,17 @@ export class CommunitiesService {
     } catch (error) {
       if (error.code === 'P2025') {
         throw new NotFoundException(
-          `Community with address ${contractAddress} not found`,
+          `Community with address ${communityAddress} not found`,
         );
       }
       throw error;
     }
   }
 
-  async findMembers(contractAddress: string) {
+    async findMembers(communityAddress: string) {
     const members = await this.prisma.communityMember.findMany({
       where: {
-        contractAddress: contractAddress
+        communityAddress: communityAddress
       },
       include: {
         user: true
@@ -142,23 +142,23 @@ export class CommunitiesService {
 
     if (!members.length) {
       throw new NotFoundException(
-        `No members found for community ${contractAddress}`
+          `No members found for community ${communityAddress}`
       );
     }
 
     return members;
   }
 
-  async findBadges(contractAddress: string) {
+  async findBadges(communityAddress: string) {
     const badges = await this.prisma.badge.findMany({
       where: {
-        contractAddress: contractAddress
+        communityAddress: communityAddress
       }
     });
 
     if (!badges.length) {
       throw new NotFoundException(
-        `No badges found for community ${contractAddress}`
+          `No badges found for community ${communityAddress}`
       );
     }
 
@@ -191,14 +191,14 @@ export class CommunitiesService {
         userAddress: userAddress
       },
       select: {
-        contractAddress: true
+        communityAddress: true
       }
     });
 
     const communities = await this.prisma.community.findMany({
       where: {
-        contractAddress: {
-          in: communitiesAddresses.map(community => community.contractAddress)
+        communityAddress: {
+          in: communitiesAddresses.map(community => community.communityAddress)
         }
       }
     });
