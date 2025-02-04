@@ -164,4 +164,14 @@ export class CommunitiesService {
 
     return badges;
   }
+
+  async findCreatedCommunities(userAddress: string) {
+    const communities = await this.prisma.community.findMany({
+      where: {
+        creatorAddress: userAddress
+      }
+    });
+
+    return communities;
+  }
 }
