@@ -13,6 +13,9 @@ function generateRecentTimestamp(): Date {
   return faker.date.past({ years: 1 });
 }
 
+// Constant for our specific user
+const SPECIFIC_USER_ADDRESS = 'GD7IDV44QE7CN35M2QLSAISAYPSOSSZTV7LWMKBU5PKDS7NQKTFRZUTS';
+
 async function main() {
   console.log('Starting database seeding...');
 
@@ -24,9 +27,15 @@ async function main() {
 
   console.log('Existing data cleared. Creating new data...');
 
-  // Create base users
+  // Create base users including our specific user
+  const specificUser = await prisma.user.create({
+    data: {
+      userAddress: SPECIFIC_USER_ADDRESS,
+    },
+  });
+
   const users = await Promise.all(
-    Array.from({ length: 20 }).map(async () => {
+    Array.from({ length: 19 }).map(async () => {
       return await prisma.user.create({
         data: {
           userAddress: generateAddress(),
@@ -35,13 +44,17 @@ async function main() {
     }),
   );
 
-  console.log(`Created ${users.length} users`);
+  // Add specific user to the users array
+  const allUsers = [specificUser, ...users];
+
+  console.log(`Created ${allUsers.length} users`);
 
   // Create communities with relationships
   const communities = await Promise.all(
-    Array.from({ length: 10 }).map(async () => {
+    Array.from({ length: 10 }).map(async (_, index) => {
       const contractAddress = generateAddress();
-      const creatorAddress = faker.helpers.arrayElement(users).userAddress;
+      // Make specific user the creator of the first community and one hidden community
+      const creatorAddress = index === 0 || index === 1 ? SPECIFIC_USER_ADDRESS : faker.helpers.arrayElement(allUsers).userAddress;
       const totalBadges = faker.number.int({ min: 1, max: 10 });
 
       // Create the community
@@ -52,16 +65,19 @@ async function main() {
           name: faker.company.name(),
           description: faker.company.catchPhrase(),
           creatorAddress: creatorAddress,
-          isHidden: faker.datatype.boolean(),
+          isHidden: index === 1, // Make the second community hidden
           blocktimestamp: generateRecentTimestamp(),
           totalBadges: totalBadges,
           lastIndexedAt: new Date(),
         },
       });
 
-      // Add some members to the community
-      const memberCount = faker.number.int({ min: 1, max: 15 });
-      const selectedUsers = faker.helpers.arrayElements(users, memberCount);
+      // Add members to the community
+      const memberCount = faker.number.int({ min: 5, max: 15 });
+      // Ensure specific user is a member of the third community
+      const selectedUsers = index === 2 
+        ? [specificUser, ...faker.helpers.arrayElements(users, memberCount - 1)]
+        : faker.helpers.arrayElements(allUsers, memberCount);
 
       await Promise.all(
         selectedUsers.map(async (user) => {
@@ -77,12 +93,9 @@ async function main() {
         }),
       );
 
-      // Add some managers
+      // Add managers
       const managerCount = faker.number.int({ min: 1, max: 3 });
-      const selectedManagers = faker.helpers.arrayElements(
-        selectedUsers,
-        managerCount,
-      );
+      const selectedManagers = faker.helpers.arrayElements(selectedUsers, managerCount);
 
       await Promise.all(
         selectedManagers.map(async (user) => {
@@ -95,7 +108,7 @@ async function main() {
         }),
       );
 
-      // Após criar a community, adicione badges
+      // Add badges
       await Promise.all(
         Array.from({ length: totalBadges }).map(async () => {
           return await prisma.badge.create({
@@ -114,9 +127,7 @@ async function main() {
     }),
   );
 
-  console.log(
-    `Created ${communities.length} communities with members and managers`,
-  );
+  console.log(`Created ${communities.length} communities with members and managers`);
 }
 
 main()
