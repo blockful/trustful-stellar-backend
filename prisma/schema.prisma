@@ -64,6 +64,7 @@ model Badge {
   contractAddress String
   name            String
   score           Int
+  type            String
 
   // Relations
   community       Community @relation(fields: [contractAddress], references: [contractAddress])
