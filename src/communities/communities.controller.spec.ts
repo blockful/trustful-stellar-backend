@@ -45,6 +45,11 @@ describe('CommunitiesController', () => {
                 ) || null,
               );
             }),
+            findMembers: jest.fn(),
+            findBadges: jest.fn(),
+            findCreatedCommunities: jest.fn(),
+            findHiddenCommunities: jest.fn(),
+            findJoinnedCommunities: jest.fn(),
           },
         },
         {
@@ -147,6 +152,97 @@ describe('CommunitiesController', () => {
       await expect(
         controller.updateVisibility(contractAddress, { isHidden: true }),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getMembers', () => {
+    const contractAddress = 'TEST_CONTRACT_ADDRESS';
+    const mockMembers = [
+      {
+        userAddress: 'USER_1',
+        contractAddress,
+        user: { userAddress: 'USER_1' }
+      }
+    ];
+
+    beforeEach(() => {
+      service.findMembers = jest.fn().mockResolvedValue(mockMembers);
+    });
+
+    it('should return members of a community', async () => {
+      const result = await controller.getMembers(contractAddress);
+      expect(result).toEqual(mockMembers);
+      expect(service.findMembers).toHaveBeenCalledWith(contractAddress);
+    });
+  });
+
+  describe('getBadges', () => {
+    const contractAddress = 'TEST_CONTRACT_ADDRESS';
+    const mockBadges = [
+      {
+        issuer: 'ISSUER_1',
+        contractAddress,
+        name: 'Badge 1',
+        score: 100
+      }
+    ];
+
+    beforeEach(() => {
+      service.findBadges = jest.fn().mockResolvedValue(mockBadges);
+    });
+
+    it('should return badges of a community', async () => {
+      const result = await controller.getBadges(contractAddress);
+      expect(result).toEqual(mockBadges);
+      expect(service.findBadges).toHaveBeenCalledWith(contractAddress);
+    });
+  });
+
+  describe('getCreatedCommunities', () => {
+    const userAddress = 'TEST_USER_ADDRESS';
+    const mockCreatedCommunities = [mockCommunities[0]];
+
+    beforeEach(() => {
+      service.findCreatedCommunities = jest.fn().mockResolvedValue(mockCreatedCommunities);
+    });
+
+    it('should return communities created by a user', async () => {
+      const result = await controller.getCreatedCommunities(userAddress);
+      expect(result).toEqual(mockCreatedCommunities);
+      expect(service.findCreatedCommunities).toHaveBeenCalledWith(userAddress);
+    });
+  });
+
+  describe('getHiddenCommunities', () => {
+    const userAddress = 'TEST_USER_ADDRESS';
+    const mockHiddenCommunities = [{
+      ...mockCommunities[0],
+      isHidden: true
+    }];
+
+    beforeEach(() => {
+      service.findHiddenCommunities = jest.fn().mockResolvedValue(mockHiddenCommunities);
+    });
+
+    it('should return hidden communities for a user', async () => {
+      const result = await controller.getHiddenCommunities(userAddress);
+      expect(result).toEqual(mockHiddenCommunities);
+      expect(service.findHiddenCommunities).toHaveBeenCalledWith(userAddress);
+    });
+  });
+
+  describe('getJoinedCommunities', () => {
+    const userAddress = 'TEST_USER_ADDRESS';
+    const mockJoinedCommunities = [mockCommunities[0]];
+
+    beforeEach(() => {
+      service.findJoinnedCommunities = jest.fn().mockResolvedValue(mockJoinedCommunities);
+    });
+
+    it('should return communities joined by a user', async () => {
+      const result = await controller.getJoinedCommunities(userAddress);
+      expect(result).toEqual(mockJoinedCommunities);
+      expect(service.findJoinnedCommunities).toHaveBeenCalledWith(userAddress);
     });
   });
 });

@@ -177,4 +177,17 @@ export class CommunitiesController {
   async getBadges(@Param('contractAddress') contractAddress: string) {
     return this.communitiesService.findBadges(contractAddress);
   }
+
+  @Get('/created/:userAddress')
+  async getCreatedCommunities(@Param('userAddress') userAddress: string) {
+    return this.communitiesService.findCreatedCommunities(userAddress);
+  }
+  @Get('/hidden/:userAddress')
+  async getHiddenCommunities(@Param('userAddress') userAddress: string) {
+    return this.communitiesService.findHiddenCommunities(userAddress);
+  }
+  @Get('/joined/:userAddress')
+  async getJoinedCommunities(@Param('userAddress') userAddress: string) {
+    return this.communitiesService.findJoinnedCommunities(userAddress);
+  }
 }
