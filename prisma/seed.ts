@@ -103,7 +103,8 @@ async function main() {
               issuer: generateAddress(),
               contractAddress: community.contractAddress,
               name: faker.company.buzzNoun(),
-              score: faker.number.int({ min: 1, max: 100 })
+              score: faker.number.int({ min: 1, max: 100 }),
+              type: faker.helpers.arrayElement(['Custom', 'Stellar', 'Soroban'])
             }
           });
         })
