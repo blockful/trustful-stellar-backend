@@ -186,4 +186,8 @@ export class CommunitiesController {
   async getHiddenCommunities(@Param('userAddress') userAddress: string) {
     return this.communitiesService.findHiddenCommunities(userAddress);
   }
+  @Get('/joined/:userAddress')
+  async getJoinedCommunities(@Param('userAddress') userAddress: string) {
+    return this.communitiesService.findJoinnedCommunities(userAddress);
+  }
 }

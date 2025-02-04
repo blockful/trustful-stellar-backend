@@ -184,4 +184,25 @@ export class CommunitiesService {
 
     return communities;
   }
+
+  async findJoinnedCommunities(userAddress: string) {
+    const communitiesAddresses = await this.prisma.communityMember.findMany({
+      where: {
+        userAddress: userAddress
+      },
+      select: {
+        contractAddress: true
+      }
+    });
+
+    const communities = await this.prisma.community.findMany({
+      where: {
+        contractAddress: {
+          in: communitiesAddresses.map(community => community.contractAddress)
+        }
+      }
+    });
+    return communities;
+  } 
+
 }
