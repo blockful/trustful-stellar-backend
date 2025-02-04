@@ -174,4 +174,14 @@ export class CommunitiesService {
 
     return communities;
   }
+  async findHiddenCommunities(userAddress: string) {
+    const communities = await this.prisma.community.findMany({
+      where: {
+        creatorAddress: userAddress,
+        isHidden: true
+      }
+    });
+
+    return communities;
+  }
 }
