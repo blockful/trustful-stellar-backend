@@ -11,7 +11,7 @@ describe('CommunitiesController', () => {
 
   const mockCommunities: CreateCommunityDto[] = [
     {
-      contractAddress:
+      communityAddress:
         'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
       factoryAddress:
         'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
@@ -38,10 +38,10 @@ describe('CommunitiesController', () => {
           provide: CommunitiesService,
           useValue: {
             findAll: jest.fn().mockResolvedValue(mockCommunities),
-            findOne: jest.fn().mockImplementation((contractAddress) => {
+            findOne: jest.fn().mockImplementation((communityAddress) => {
               return Promise.resolve(
                 mockCommunities.find(
-                  (c) => c.contractAddress === contractAddress,
+                  (c) => c.communityAddress === communityAddress,
                 ) || null,
               );
             }),

@@ -32,7 +32,7 @@ export class CommunitiesController {
     content: {
       'application/json': {
         example: [{
-          contractAddress: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+          communityAddress: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
           factoryAddress: 'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
           name: 'Stellar Developers Community',
           description: 'A community for Stellar blockchain developers',
@@ -53,7 +53,7 @@ export class CommunitiesController {
     return this.communitiesService.findAll();
   }
 
-  @Get(':contractAddress')
+  @Get(':communityAddress')
   @ApiOperation({
     summary: 'Get community details',
     description: `
@@ -62,7 +62,7 @@ export class CommunitiesController {
     `
   })
   @ApiParam({
-    name: 'contractAddress',
+    name: 'communityAddress',
     description: 'Soroban contract address of the community',
     example: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
     required: true
@@ -74,7 +74,7 @@ export class CommunitiesController {
     content: {
       'application/json': {
         example: [{
-          contractAddress: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+          communityAddress: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
           factoryAddress: 'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
           name: 'Stellar Developers Community',
           description: 'A community for Stellar blockchain developers',
@@ -104,16 +104,16 @@ export class CommunitiesController {
     }
   })
   async findOne(
-    @Param('contractAddress') contractAddress: string,
+    @Param('communityAddress') communityAddress: string,
   ): Promise<CreateCommunityDto> {
-    const community = await this.communitiesService.findOne(contractAddress);
+    const community = await this.communitiesService.findOne(communityAddress);
     if (!community) {
       throw new NotFoundException('Community not found');
     }
     return community;
   }
 
-  @Patch(':contractAddress/visibility')
+  @Patch(':communityAddress/visibility')
   @ApiOperation({
     summary: 'Update community visibility',
     description: `
@@ -123,7 +123,7 @@ export class CommunitiesController {
     `
   })
   @ApiParam({
-    name: 'contractAddress',
+    name: 'communityAddress',
     required: true,
     description: 'Soroban contract address of the community to update'
   })
@@ -133,18 +133,18 @@ export class CommunitiesController {
     content: {
       'application/json': {
         example: {
-          contractAddress: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+          communityAddress: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
           isHidden: true,
         }
       }
     }
   })
   async updateVisibility(
-    @Param('contractAddress') contractAddress: string,
+    @Param('communityAddress') communityAddress: string,
     @Body() updateHiddenStatusDto: UpdateHiddenStatusDto,
   ): Promise<CreateCommunityDto> {
     const updatedCommunity = await this.communitiesService.updateVisibility(
-      contractAddress,
+      communityAddress,
       updateHiddenStatusDto.isHidden,
     );
 
@@ -155,16 +155,16 @@ export class CommunitiesController {
     return updatedCommunity;
   }
 
-  @Get(':contractAddress/members')
+  @Get(':communityAddress/members')
   @ApiOperation({
     summary: 'Get community members',
     description: 'Retrieves all members of a specific community'
   })
-  async getMembers(@Param('contractAddress') contractAddress: string) {
-    return this.communitiesService.findMembers(contractAddress);
+  async getMembers(@Param('communityAddress') communityAddress: string) {
+    return this.communitiesService.findMembers(communityAddress);
   }
 
-  @Get(':contractAddress/badges')
+  @Get(':communityAddress/badges')
   @ApiOperation({
     summary: 'Get community badges',
     description: 'Retrieves all badges from a specific community'
@@ -174,8 +174,8 @@ export class CommunitiesController {
     description: 'List of badges retrieved successfully',
     type: [BadgeDto]
   })
-  async getBadges(@Param('contractAddress') contractAddress: string) {
-    return this.communitiesService.findBadges(contractAddress);
+  async getBadges(@Param('communityAddress') communityAddress: string) {
+    return this.communitiesService.findBadges(communityAddress);
   }
 
   @Get('/created/:userAddress')

@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "Community" (
-    "contractAddress" TEXT NOT NULL,
+    "communityAddress" TEXT NOT NULL,
     "factoryAddress" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE "Community" (
     "totalBadges" INTEGER NOT NULL,
     "lasIndexedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "Community_pkey" PRIMARY KEY ("contractAddress")
+    CONSTRAINT "Community_pkey" PRIMARY KEY ("communityAddress")
 );
 
 -- CreateTable
@@ -26,7 +26,7 @@ CREATE TABLE "CommunityMember" (
     "userAddress" TEXT NOT NULL,
     "isManager" BOOLEAN NOT NULL DEFAULT false,
     "isCreator" BOOLEAN NOT NULL DEFAULT false,
-    "contractAddress" TEXT NOT NULL,
+    "communityAddress" TEXT NOT NULL,
     "lastIndexedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "CommunityMember_pkey" PRIMARY KEY ("id")
@@ -36,16 +36,16 @@ CREATE TABLE "CommunityMember" (
 CREATE TABLE "CommunityManager" (
     "id" SERIAL NOT NULL,
     "managerAddress" TEXT NOT NULL,
-    "contractAddress" TEXT NOT NULL,
+    "communityAddress" TEXT NOT NULL,
 
     CONSTRAINT "CommunityManager_pkey" PRIMARY KEY ("id")
 );
 
 -- AddForeignKey
-ALTER TABLE "CommunityMember" ADD CONSTRAINT "CommunityMember_contractAddress_fkey" FOREIGN KEY ("contractAddress") REFERENCES "Community"("contractAddress") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "CommunityMember" ADD CONSTRAINT "CommunityMember_communityAddress_fkey" FOREIGN KEY ("communityAddress") REFERENCES "Community"("communityAddress") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "CommunityMember" ADD CONSTRAINT "CommunityMember_userAddress_fkey" FOREIGN KEY ("userAddress") REFERENCES "User"("userAddress") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "CommunityManager" ADD CONSTRAINT "CommunityManager_contractAddress_fkey" FOREIGN KEY ("contractAddress") REFERENCES "Community"("contractAddress") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "CommunityManager" ADD CONSTRAINT "CommunityManager_communityAddress_fkey" FOREIGN KEY ("communityAddress") REFERENCES "Community"("communityAddress") ON DELETE RESTRICT ON UPDATE CASCADE;

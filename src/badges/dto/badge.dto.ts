@@ -10,7 +10,7 @@ export class BadgeDto {
   @ApiProperty({ description: 'Community contract address' })
   @IsNotEmpty()
   @IsString()
-  contractAddress: string;
+  communityAddress: string;
 
   @ApiProperty()
   @IsNotEmpty()

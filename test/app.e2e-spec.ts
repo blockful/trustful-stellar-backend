@@ -13,7 +13,7 @@ describe('Communities (e2e)', () => {
 
   // Our mock community data representing what we expect from the database
   const mockCommunity = {
-    contractAddress:
+    communityAddress:
       'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
     factoryAddress:
       'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
@@ -23,6 +23,17 @@ describe('Communities (e2e)', () => {
     isHidden: false,
     blocktimestamp: new Date(),
     totalBadges: 10,
+  };
+
+  const hiddenCommunity = {
+    communityAddress: 'HIDDEN_COMMUNITY_ADDRESS',
+    isHidden: true,
+    factoryAddress: 'FACTORY_ADDRESS',
+    name: 'Hidden Community',
+    description: 'Hidden Description',
+    creatorAddress: 'CREATOR_ADDRESS',
+    blocktimestamp: new Date(),
+    totalBadges: 0
   };
 
   // Setting up our test environment before all tests
@@ -68,7 +79,7 @@ describe('Communities (e2e)', () => {
         .expect((res) => {
           expect(res.body).toBeInstanceOf(Array);
           expect(res.body[0]).toMatchObject({
-            contractAddress: mockCommunity.contractAddress,
+            communityAddress: mockCommunity.communityAddress,
             name: mockCommunity.name,
             totalBadges: mockCommunity.totalBadges,
           });
@@ -91,11 +102,11 @@ describe('Communities (e2e)', () => {
   describe('/communities/:contractAddress (GET)', () => {
     it('should return a specific community when given a valid contract address', () => {
       return request(app.getHttpServer())
-        .get(`/communities/${mockCommunity.contractAddress}`)
+        .get(`/communities/${mockCommunity.communityAddress}`)
         .expect(200)
         .expect((res) => {
           expect(res.body).toMatchObject({
-            contractAddress: mockCommunity.contractAddress,
+            communityAddress: mockCommunity.communityAddress,
             factoryAddress: mockCommunity.factoryAddress,
             name: mockCommunity.name,
             description: mockCommunity.description,
@@ -127,12 +138,6 @@ describe('Communities (e2e)', () => {
 
     it('should not return hidden communities in the list', async () => {
       // Creating a hidden community
-      const hiddenCommunity = {
-        ...mockCommunity,
-        contractAddress: 'DIFFERENTADDRESS',
-        isHidden: true,
-      };
-
       await prismaService.community.create({ data: hiddenCommunity });
 
       return request(app.getHttpServer())
@@ -149,12 +154,12 @@ describe('Communities (e2e)', () => {
   describe('/communities/:contractAddress/visibility (PATCH)', () => {
     it('should update community visibility status', async () => {
       return request(app.getHttpServer())
-        .patch(`/communities/${mockCommunity.contractAddress}/visibility`)
+        .patch(`/communities/${mockCommunity.communityAddress}/visibility`)
         .send({ isHidden: true })
         .expect(200)
         .expect((res) => {
           expect(res.body.isHidden).toBe(true);
-          expect(res.body.contractAddress).toBe(mockCommunity.contractAddress);
+          expect(res.body.communityAddress).toBe(mockCommunity.communityAddress);
         });
     });
 
