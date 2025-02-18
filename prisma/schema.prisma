@@ -15,14 +15,14 @@ datasource db {
 
 model Community {
   communityAddress String   @id
-  factoryAddress  String
-  name            String
-  description     String
-  creatorAddress  String
-  isHidden        Boolean
-  blocktimestamp  DateTime
-  totalBadges     Int
-  lastIndexedAt   DateTime @updatedAt
+  factoryAddress   String
+  name             String
+  description      String
+  creatorAddress   String
+  isHidden         Boolean
+  blocktimestamp   DateTime
+  totalBadges      Int
+  lastIndexedAt    DateTime @updatedAt
 
   // Relations
   members  CommunityMember[]
@@ -38,12 +38,14 @@ model User {
 }
 
 model CommunityMember {
-  id              Int      @id @default(autoincrement())
-  userAddress     String
-  isManager       Boolean  @default(false)
-  isCreator       Boolean  @default(false)
+  id               Int      @id @default(autoincrement())
+  userAddress      String
+  isManager        Boolean  @default(false)
+  isCreator        Boolean  @default(false)
   communityAddress String
-  lastIndexedAt   DateTime @updatedAt
+  points           Int
+  badges           Int
+  lastIndexedAt    DateTime @updatedAt
 
   // Relations
   community Community @relation(fields: [communityAddress], references: [communityAddress])
@@ -51,8 +53,8 @@ model CommunityMember {
 }
 
 model CommunityManager {
-  id              Int    @id @default(autoincrement())
-  managerAddress  String
+  id               Int    @id @default(autoincrement())
+  managerAddress   String
   communityAddress String
 
   // Relations
@@ -60,14 +62,14 @@ model CommunityManager {
 }
 
 model Badge {
-  issuer          String
+  issuer           String
   communityAddress String
-  name            String
-  score           Int
-  type            String
+  name             String
+  score            Int
+  type             String
 
   // Relations
-  community       Community @relation(fields: [communityAddress], references: [communityAddress])
+  community Community @relation(fields: [communityAddress], references: [communityAddress])
 
   @@id([issuer, communityAddress])
 }
