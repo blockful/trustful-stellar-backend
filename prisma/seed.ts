@@ -75,7 +75,7 @@ async function main() {
       // Add members to the community
       const memberCount = faker.number.int({ min: 5, max: 15 });
       // Ensure specific user is a member of the third community
-      const selectedUsers = index === 2 
+      const selectedUsers = index === 2
         ? [specificUser, ...faker.helpers.arrayElements(users, memberCount - 1)]
         : faker.helpers.arrayElements(allUsers, memberCount);
 
@@ -87,6 +87,8 @@ async function main() {
               communityAddress: community.communityAddress,
               isManager: faker.datatype.boolean(),
               isCreator: user.userAddress === creatorAddress,
+              points: faker.number.int({ min: 1, max: 500 }),
+              badges: faker.number.int({ min: 1, max: 20 }),
               lastIndexedAt: new Date(),
             },
           });
