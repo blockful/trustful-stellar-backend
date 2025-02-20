@@ -237,7 +237,8 @@ describe('CommunitiesService', () => {
       expect(result).toEqual(mockMembers);
       expect(prismaService.communityMember.findMany).toHaveBeenCalledWith({
         where: { communityAddress },
-        include: { user: true }
+        include: { user: true },
+        orderBy: { points: 'desc' }
       });
     });
 
@@ -352,7 +353,7 @@ describe('CommunitiesService', () => {
       { communityAddress: 'CONTRACT_1' },
       { communityAddress: 'CONTRACT_2' }
     ];
-  
+
     const mockCommunities = [
       {
         ...mockPrismaResponse,
@@ -363,15 +364,15 @@ describe('CommunitiesService', () => {
         communityAddress: 'CONTRACT_2'
       }
     ];
-  
+
     beforeEach(() => {
       prismaService.communityMember.findMany = jest.fn().mockResolvedValue(mockCommunityAddresses);
       prismaService.community.findMany = jest.fn().mockResolvedValue(mockCommunities);
     });
-  
+
     it('should return all communities joined by a user', async () => {
       const result = await service.findJoinnedCommunities(userAddress);
-  
+
       expect(result).toEqual(mockCommunities);
       expect(prismaService.communityMember.findMany).toHaveBeenCalledWith({
         where: { userAddress },
