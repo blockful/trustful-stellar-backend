@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class CommunitiesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(): Promise<CreateCommunityDto[]> {
     const communities = await this.prisma.community.findMany({
@@ -23,7 +23,7 @@ export class CommunitiesService {
       },
       where: {
         isHidden: false,
-      },
+      }
     });
 
     // Transform the data to match our DTO
@@ -62,7 +62,7 @@ export class CommunitiesService {
 
     if (!community) {
       throw new NotFoundException(
-          `Community with contract address ${communityAddress} not found`,
+        `Community with contract address ${communityAddress} not found`,
       );
     }
 
@@ -130,19 +130,22 @@ export class CommunitiesService {
     }
   }
 
-    async findMembers(communityAddress: string) {
+  async findMembers(communityAddress: string) {
     const members = await this.prisma.communityMember.findMany({
       where: {
         communityAddress: communityAddress
       },
       include: {
         user: true
+      },
+      orderBy: {
+        points: 'desc'
       }
     });
 
     if (!members.length) {
       throw new NotFoundException(
-          `No members found for community ${communityAddress}`
+        `No members found for community ${communityAddress}`
       );
     }
 
@@ -158,7 +161,7 @@ export class CommunitiesService {
 
     if (!badges.length) {
       throw new NotFoundException(
-          `No badges found for community ${communityAddress}`
+        `No badges found for community ${communityAddress}`
       );
     }
 
@@ -203,6 +206,6 @@ export class CommunitiesService {
       }
     });
     return communities;
-  } 
+  }
 
 }
