@@ -292,22 +292,6 @@ describe('CommunitiesService', () => {
 
   describe('findCreatedCommunities', () => {
     const userAddress = 'TEST_USER_ADDRESS';
-    // const mockCommunities = [
-    //   {
-    //     contractAddress: 'CONTRACT_1',
-    //     name: 'Community 1',
-    //     creatorAddress: userAddress
-    //   },
-    //   {
-    //     contractAddress: 'CONTRACT_2',
-    //     name: 'Community 2',
-    //     creatorAddress: userAddress
-    //   }
-    // ];
-
-    // beforeEach(() => {
-    //   prismaService.community.findMany = jest.fn().mockResolvedValue(mockCommunities);
-    // });
 
     it('should return all communities created by a user', async () => {
       const result = await service.findCreatedCommunities(userAddress);
