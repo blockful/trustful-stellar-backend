@@ -170,22 +170,70 @@ export class CommunitiesService {
 
   async findCreatedCommunities(userAddress: string) {
     const communities = await this.prisma.community.findMany({
+      include: {
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+
+        managers: {
+          select: {
+            managerAddress: true,
+          },
+        },
+      },
       where: {
         creatorAddress: userAddress
       }
     });
 
-    return communities;
+    return communities.map((community) => ({
+      communityAddress: community.communityAddress,
+      factoryAddress: community.factoryAddress,
+      name: community.name,
+      description: community.description,
+      creatorAddress: community.creatorAddress,
+      isHidden: community.isHidden,
+      blocktimestamp: community.blocktimestamp,
+      totalBadges: community.totalBadges,
+      totalMembers: community._count.members,
+      managers: community.managers.map((manager) => manager.managerAddress),
+    }));
   }
   async findHiddenCommunities(userAddress: string) {
     const communities = await this.prisma.community.findMany({
+      include: {
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+
+        managers: {
+          select: {
+            managerAddress: true,
+          },
+        },
+      },
       where: {
         creatorAddress: userAddress,
         isHidden: true
       }
     });
 
-    return communities;
+    return communities.map((community) => ({
+      communityAddress: community.communityAddress,
+      factoryAddress: community.factoryAddress,
+      name: community.name,
+      description: community.description,
+      creatorAddress: community.creatorAddress,
+      isHidden: community.isHidden,
+      blocktimestamp: community.blocktimestamp,
+      totalBadges: community.totalBadges,
+      totalMembers: community._count.members,
+      managers: community.managers.map((manager) => manager.managerAddress),
+    }));
   }
 
   async findJoinnedCommunities(userAddress: string) {
@@ -199,13 +247,39 @@ export class CommunitiesService {
     });
 
     const communities = await this.prisma.community.findMany({
+      include: {
+        _count: {
+          select: {
+            members: true,
+          },
+        },
+
+        managers: {
+          select: {
+            managerAddress: true,
+          },
+        },
+      },
       where: {
         communityAddress: {
           in: communitiesAddresses.map(community => community.communityAddress)
         }
       }
     });
-    return communities;
+
+
+    return communities.map((community) => ({
+      communityAddress: community.communityAddress,
+      factoryAddress: community.factoryAddress,
+      name: community.name,
+      description: community.description,
+      creatorAddress: community.creatorAddress,
+      isHidden: community.isHidden,
+      blocktimestamp: community.blocktimestamp,
+      totalBadges: community.totalBadges,
+      totalMembers: community._count.members,
+      managers: community.managers.map((manager) => manager.managerAddress),
+    }));
   }
 
 }
