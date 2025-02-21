@@ -292,28 +292,59 @@ describe('CommunitiesService', () => {
 
   describe('findCreatedCommunities', () => {
     const userAddress = 'TEST_USER_ADDRESS';
-    const mockCommunities = [
-      {
-        contractAddress: 'CONTRACT_1',
-        name: 'Community 1',
-        creatorAddress: userAddress
-      },
-      {
-        contractAddress: 'CONTRACT_2',
-        name: 'Community 2',
-        creatorAddress: userAddress
-      }
-    ];
+    // const mockCommunities = [
+    //   {
+    //     contractAddress: 'CONTRACT_1',
+    //     name: 'Community 1',
+    //     creatorAddress: userAddress
+    //   },
+    //   {
+    //     contractAddress: 'CONTRACT_2',
+    //     name: 'Community 2',
+    //     creatorAddress: userAddress
+    //   }
+    // ];
 
-    beforeEach(() => {
-      prismaService.community.findMany = jest.fn().mockResolvedValue(mockCommunities);
-    });
+    // beforeEach(() => {
+    //   prismaService.community.findMany = jest.fn().mockResolvedValue(mockCommunities);
+    // });
 
     it('should return all communities created by a user', async () => {
       const result = await service.findCreatedCommunities(userAddress);
 
-      expect(result).toEqual(mockCommunities);
+      expect(result).toEqual([
+        {
+          communityAddress:
+            'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+          factoryAddress:
+            'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
+          name: 'Test Community',
+          description: 'Test Description',
+          creatorAddress:
+            'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
+          isHidden: false,
+          blocktimestamp: expect.any(Date),
+          totalBadges: 10,
+          totalMembers: 5,
+          managers: [
+            'GDUMR3GDVKYMABGVOQHVKNWMXHVYKZLTWWQZCDZV7GZVWPJVJAXKHXFX',
+            'GDZAP3QWXBZAPILZBCJ5LYIJYVXZSNJ4WCYCNHBQPQHCJX2RNXRUMMZN',
+          ],
+        },
+      ]);
       expect(prismaService.community.findMany).toHaveBeenCalledWith({
+        include: {
+          _count: {
+            select: {
+              members: true,
+            },
+          },
+          managers: {
+            select: {
+              managerAddress: true,
+            },
+          },
+        },
         where: { creatorAddress: userAddress }
       });
     });
@@ -321,24 +352,43 @@ describe('CommunitiesService', () => {
 
   describe('findHiddenCommunities', () => {
     const userAddress = 'TEST_USER_ADDRESS';
-    const mockHiddenCommunities = [
-      {
-        contractAddress: 'CONTRACT_1',
-        name: 'Hidden Community 1',
-        creatorAddress: userAddress,
-        isHidden: true
-      }
-    ];
-
-    beforeEach(() => {
-      prismaService.community.findMany = jest.fn().mockResolvedValue(mockHiddenCommunities);
-    });
 
     it('should return all hidden communities for a user', async () => {
       const result = await service.findHiddenCommunities(userAddress);
 
-      expect(result).toEqual(mockHiddenCommunities);
+      expect(result).toEqual([
+        {
+          communityAddress:
+            'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+          factoryAddress:
+            'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
+          name: 'Test Community',
+          description: 'Test Description',
+          creatorAddress:
+            'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
+          isHidden: false,
+          blocktimestamp: expect.any(Date),
+          totalBadges: 10,
+          totalMembers: 5,
+          managers: [
+            'GDUMR3GDVKYMABGVOQHVKNWMXHVYKZLTWWQZCDZV7GZVWPJVJAXKHXFX',
+            'GDZAP3QWXBZAPILZBCJ5LYIJYVXZSNJ4WCYCNHBQPQHCJX2RNXRUMMZN',
+          ],
+        },
+      ]);
       expect(prismaService.community.findMany).toHaveBeenCalledWith({
+        include: {
+          _count: {
+            select: {
+              members: true,
+            },
+          },
+          managers: {
+            select: {
+              managerAddress: true,
+            },
+          },
+        },
         where: {
           creatorAddress: userAddress,
           isHidden: true
@@ -350,35 +400,54 @@ describe('CommunitiesService', () => {
   describe('findJoinnedCommunities', () => {
     const userAddress = 'TEST_USER_ADDRESS';
     const mockCommunityAddresses = [
-      { communityAddress: 'CONTRACT_1' },
-      { communityAddress: 'CONTRACT_2' }
-    ];
-
-    const mockCommunities = [
-      {
-        ...mockPrismaResponse,
-        communityAddress: 'CONTRACT_1'
-      },
-      {
-        ...mockPrismaResponse,
-        communityAddress: 'CONTRACT_2'
-      }
+      { communityAddress: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA' }
     ];
 
     beforeEach(() => {
       prismaService.communityMember.findMany = jest.fn().mockResolvedValue(mockCommunityAddresses);
-      prismaService.community.findMany = jest.fn().mockResolvedValue(mockCommunities);
+      prismaService.community.findMany = jest.fn().mockResolvedValue([mockPrismaResponse]);
     });
 
     it('should return all communities joined by a user', async () => {
       const result = await service.findJoinnedCommunities(userAddress);
 
-      expect(result).toEqual(mockCommunities);
+      expect(result).toEqual([
+        {
+          communityAddress:
+            'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+          factoryAddress:
+            'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
+          name: 'Test Community',
+          description: 'Test Description',
+          creatorAddress:
+            'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
+          isHidden: false,
+          blocktimestamp: expect.any(Date),
+          totalBadges: 10,
+          totalMembers: 5,
+          managers: [
+            'GDUMR3GDVKYMABGVOQHVKNWMXHVYKZLTWWQZCDZV7GZVWPJVJAXKHXFX',
+            'GDZAP3QWXBZAPILZBCJ5LYIJYVXZSNJ4WCYCNHBQPQHCJX2RNXRUMMZN',
+          ],
+        },
+      ]);
       expect(prismaService.communityMember.findMany).toHaveBeenCalledWith({
         where: { userAddress },
         select: { communityAddress: true }
       });
       expect(prismaService.community.findMany).toHaveBeenCalledWith({
+        include: {
+          _count: {
+            select: {
+              members: true,
+            },
+          },
+          managers: {
+            select: {
+              managerAddress: true,
+            },
+          },
+        },
         where: {
           communityAddress: {
             in: mockCommunityAddresses.map(community => community.communityAddress)
