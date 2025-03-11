@@ -5,8 +5,8 @@ services:
     image: postgres:latest
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123
-      POSTGRES_DB: nest
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
     ports:
       - '5432:5432'
     volumes:
@@ -24,7 +24,7 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:123@postgres:5432/nest
     ports:
-      - '3000:3000'
+      - '3001:3001'
       - '5555:5555'
     volumes:
       - .:/app
@@ -32,3 +32,4 @@ services:
 
 volumes:
   postgres_data:
+
