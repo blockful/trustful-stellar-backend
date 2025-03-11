@@ -6,23 +6,36 @@ import { BadgeDto } from './dto/badge.dto';
 export class BadgesService {
   constructor(private prisma: PrismaService) {}
 
-  async findBadgesByType(type: string) {
-    const badges = await this.prisma.badge.findMany({
-      where: {
-        type: type
-      }
-    });
+  /*
+   * Find badges by type
+   * @param type The badge type to search for
+   * @returns Array of badges matching the type
+   * @throws NotFoundException if no badges are found
+   *
+   * async findBadgesByType(type: string) {
+   *   const badges = await this.prisma.badge.findMany({
+   *     where: {
+   *       type: type
+   *     }
+   *   });
+   *
+   *   if (!badges.length) {
+   *     throw new NotFoundException(`No badges found with type ${type}`);
+   *   }
+   *
+   *   return badges;
+   * }
+   */
 
-    if (!badges.length) {
-      throw new NotFoundException(`No badges found with type ${type}`);
-    }
-
-    return badges;
-  }
-
-  async createBadge(badgeDto: BadgeDto) {
-    return this.prisma.badge.create({
-      data: badgeDto
-    });
-  }
+  /*
+   * Create a new badge
+   * @param badgeDto The badge data transfer object
+   * @returns The created badge
+   *
+   * async createBadge(badgeDto: BadgeDto) {
+   *   return this.prisma.badge.create({
+   *     data: badgeDto
+   *   });
+   * }
+   */
 }
