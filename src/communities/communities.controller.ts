@@ -10,7 +10,7 @@ import { CommunitiesService } from './communities.service';
 import { CreateCommunityDto } from './dto/create-community.dto';
 import { ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { UpdateHiddenStatusDto } from './dto/update-hidden-status.dto';
-import { BadgeDto } from './dto/badge.dto';
+// import { BadgeDto } from './dto/badge.dto';
 
 @Controller('communities')
 export class CommunitiesController {
@@ -53,7 +53,7 @@ export class CommunitiesController {
     return this.communitiesService.findAll();
   }
 
-  @Get(':communityAddress')
+  @Get(':communityId')
   @ApiOperation({
     summary: 'Get community details',
     description: `
@@ -62,9 +62,8 @@ export class CommunitiesController {
     `
   })
   @ApiParam({
-    name: 'communityAddress',
-    description: 'Soroban contract address of the community',
-    example: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+    name: 'communityId',
+    description: 'ID of the community',
     required: true
   })
   @ApiResponse({
@@ -104,9 +103,9 @@ export class CommunitiesController {
     }
   })
   async findOne(
-    @Param('communityAddress') communityAddress: string,
+    @Param('communityId') communityId: string,
   ): Promise<CreateCommunityDto> {
-    const community = await this.communitiesService.findOne(communityAddress);
+    const community = await this.communitiesService.findOne(communityId);
     if (!community) {
       throw new NotFoundException('Community not found');
     }
@@ -164,28 +163,30 @@ export class CommunitiesController {
     return this.communitiesService.findMembers(communityAddress);
   }
 
-  @Get(':communityAddress/badges')
-  @ApiOperation({
-    summary: 'Get community badges',
-    description: 'Retrieves all badges from a specific community'
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'List of badges retrieved successfully',
-    type: [BadgeDto]
-  })
-  async getBadges(@Param('communityAddress') communityAddress: string) {
-    return this.communitiesService.findBadges(communityAddress);
-  }
+  /*
+   * @Get(':communityAddress/badges')
+   * @ApiOperation({
+   *   summary: 'Get community badges',
+   *   description: 'Retrieves all badges from a specific community'
+   * })
+   * @ApiResponse({
+   *   status: 200,
+   *   description: 'List of badges retrieved successfully',
+   *   type: [BadgeDto]
+   * })
+   * async getBadges(@Param('communityAddress') communityAddress: string) {
+   *   return this.communitiesService.findBadges(communityAddress);
+   * }
+   */
 
-  @Get('/created/:userAddress')
-  async getCreatedCommunities(@Param('userAddress') userAddress: string) {
-    return this.communitiesService.findCreatedCommunities(userAddress);
-  }
-  @Get('/hidden/:userAddress')
-  async getHiddenCommunities(@Param('userAddress') userAddress: string) {
-    return this.communitiesService.findHiddenCommunities(userAddress);
-  }
+  // @Get('/created/:userAddress')
+  // async getCreatedCommunities(@Param('userAddress') userAddress: string) {
+  //   return this.communitiesService.findCreatedCommunities(userAddress);
+  // }
+  // @Get('/hidden/:userAddress')
+  // async getHiddenCommunities(@Param('userAddress') userAddress: string) {
+  //   return this.communitiesService.findHiddenCommunities(userAddress);
+  // }
   @Get('/joined/:userAddress')
   async getJoinedCommunities(@Param('userAddress') userAddress: string) {
     return this.communitiesService.findJoinnedCommunities(userAddress);

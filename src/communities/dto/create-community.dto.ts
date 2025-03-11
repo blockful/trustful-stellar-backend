@@ -5,55 +5,42 @@ import {
   IsNumber,
   IsArray,
   IsBoolean,
+  IsOptional,
 } from 'class-validator';
 
 export class CreateCommunityDto {
-  @ApiProperty({ description: 'Soroban contract address for the community' })
+  @ApiProperty({ description: 'Community unique identifier' })
   @IsNotEmpty()
   @IsString()
-  communityAddress: string;
+  id: string;
 
-  @ApiProperty({ description: 'Soroban factory contract address' })
-  @IsNotEmpty()
-  @IsString()
-  factoryAddress: string;
-
-  @ApiProperty()
+  @ApiProperty({ description: 'Community name' })
   @IsNotEmpty()
   @IsString()
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Community description' })
   @IsNotEmpty()
   @IsString()
   description: string;
 
-  @ApiProperty({ description: 'Stellar address of the community creator' })
+  @ApiProperty({ description: 'Community issuer address' })
   @IsNotEmpty()
   @IsString()
-  creatorAddress: string;
+  issuer: string;
 
-  @ApiProperty()
+  @ApiProperty({ description: 'Whether the community is hidden', required: false })
   @IsBoolean()
-  isHidden: boolean;
+  @IsOptional()
+  isHidden?: boolean = false;
 
-  @ApiProperty()
-  blocktimestamp: Date;
-
-  @ApiProperty({
-    description: 'Total number of badges defined in the contract',
-  })
-  @IsNumber()
-  totalBadges: number;
-
-  @ApiProperty()
+  @ApiProperty({ description: 'Total number of members in the community' })
   @IsNumber()
   totalMembers: number;
 
-  @ApiProperty({
-    description: 'Array of Stellar addresses for community managers',
-  })
+  @ApiProperty({ description: 'List of manager addresses' })
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  managers: string[];
+  managers: string[] = [];
 }

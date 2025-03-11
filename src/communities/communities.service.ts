@@ -8,204 +8,195 @@ export class CommunitiesService {
 
   async findAll(): Promise<CreateCommunityDto[]> {
     const communities = await this.prisma.community.findMany({
-      include: {
-        _count: {
-          select: {
-            members: true,
-          },
-        },
-
-        managers: {
-          select: {
-            managerAddress: true,
-          },
-        },
-      },
       where: {
-        isHidden: false,
+        is_hidden: false
+      },
+      include: {
+        members: {
+          orderBy: {
+            last_score_update: 'desc'
+          }
+        }
+      },
+      orderBy: {
+        id: 'desc'
       }
     });
 
-    // Transform the data to match our DTO
-    return communities.map((community) => ({
-      communityAddress: community.communityAddress,
-      factoryAddress: community.factoryAddress,
+    // Group by ID and take the latest entry for each ID
+    const latestCommunities = Object.values(
+      communities.reduce((acc, community) => {
+        // Only keep the first (latest) occurrence of each ID
+        if (!acc[community.id]) {
+          acc[community.id] = community;
+        }
+        return acc;
+      }, {} as Record<string, typeof communities[0]>)
+    );
+
+    return latestCommunities.map(community => ({
+      id: community.id,
       name: community.name,
-      description: community.description,
-      creatorAddress: community.creatorAddress,
-      isHidden: community.isHidden,
-      blocktimestamp: community.blocktimestamp,
-      totalBadges: community.totalBadges,
-      totalMembers: community._count.members,
-      managers: community.managers.map((manager) => manager.managerAddress),
+      description: community.description || '',
+      issuer: community.issuer,
+      isHidden: community.is_hidden,
+      totalMembers: community.members.length,
+      managers: []
     }));
   }
 
-  async findOne(communityAddress: string): Promise<CreateCommunityDto> {
+  // TODO: Add creator_addres and total_badges and managers
+  async findOne(communityId: string): Promise<CreateCommunityDto> {
+
     const community = await this.prisma.community.findUnique({
       where: {
-        communityAddress,
+        id: communityId
       },
       include: {
-        _count: {
-          select: {
-            members: true,
-          },
-        },
-        managers: {
-          select: {
-            managerAddress: true,
-          },
-        },
-      },
+        members: true
+      }
     });
 
     if (!community) {
-      throw new NotFoundException(
-        `Community with contract address ${communityAddress} not found`,
-      );
+      throw new NotFoundException(`Community with ID ${communityId} not found`);
     }
 
     return {
-      communityAddress: community.communityAddress,
-      factoryAddress: community.factoryAddress,
+      id: community.id,
       name: community.name,
-      description: community.description,
-      creatorAddress: community.creatorAddress,
-      isHidden: community.isHidden,
-      blocktimestamp: community.blocktimestamp,
-      totalBadges: community.totalBadges,
-      totalMembers: community._count.members,
-      managers: community.managers.map((manager) => manager.managerAddress),
+      description: community.description || '',
+      issuer: community.issuer,
+      isHidden: community.is_hidden,
+      totalMembers: community.members.length,
+      managers: [] // community.members.filter(member => member.is_manager).map(member => member.user_id)
     };
   }
 
   async updateVisibility(
-    communityAddress: string,
+    communityId: string,
     isHidden: boolean,
   ): Promise<CreateCommunityDto> {
     try {
       const updatedCommunity = await this.prisma.community.update({
         where: {
-          communityAddress,
+          id: communityId,
         },
         data: {
-          isHidden,
+          is_hidden: isHidden,
         },
         include: {
-          _count: {
-            select: {
-              members: true,
-            },
-          },
-          managers: {
-            select: {
-              managerAddress: true,
-            },
-          },
+          members: true
         },
       });
 
+      //TODO: missing the community_creator, total_badges and manaagers
       return {
-        communityAddress: updatedCommunity.communityAddress,
-        factoryAddress: updatedCommunity.factoryAddress,
+        id: updatedCommunity.id,
+        issuer: updatedCommunity.issuer,
         name: updatedCommunity.name,
-        description: updatedCommunity.description,
-        creatorAddress: updatedCommunity.creatorAddress,
-        isHidden: updatedCommunity.isHidden,
-        blocktimestamp: updatedCommunity.blocktimestamp,
-        totalBadges: updatedCommunity.totalBadges,
-        totalMembers: updatedCommunity._count.members,
-        managers: updatedCommunity.managers.map(
-          (manager) => manager.managerAddress,
-        ),
+        description: updatedCommunity.description || '',
+        totalMembers: updatedCommunity.members.length,
+        isHidden: updatedCommunity.is_hidden, 
+        managers: []
       };
     } catch (error) {
       if (error.code === 'P2025') {
         throw new NotFoundException(
-          `Community with address ${communityAddress} not found`,
+          `Community with ID ${communityId} not found`,
         );
       }
       throw error;
     }
   }
 
-  async findMembers(communityAddress: string) {
+  async findMembers(communityId: string) {
     const members = await this.prisma.communityMember.findMany({
       where: {
-        communityAddress: communityAddress
-      },
-      include: {
-        user: true
+        community_id: communityId,
       },
       orderBy: {
-        points: 'desc'
-      }
+        score: 'desc',
+      },
     });
 
     if (!members.length) {
       throw new NotFoundException(
-        `No members found for community ${communityAddress}`
+        `No members found for community ${communityId}`
       );
     }
 
     return members;
   }
 
-  async findBadges(communityAddress: string) {
-    const badges = await this.prisma.badge.findMany({
-      where: {
-        communityAddress: communityAddress
-      }
-    });
+  // async findBadges(communityAddress: string) {
+  //   const badges = await this.prisma.badge.findMany({
+  //     where: {
+  //       communityAddress: communityAddress
+  //     }
+  //   });
 
-    if (!badges.length) {
-      throw new NotFoundException(
-        `No badges found for community ${communityAddress}`
-      );
-    }
+  //   if (!badges.length) {
+  //     throw new NotFoundException(
+  //       `No badges found for community ${communityAddress}`
+  //     );
+  //   }
 
-    return badges;
-  }
+  //   return badges;
+  // }
 
-  async findCreatedCommunities(userAddress: string) {
-    const communities = await this.prisma.community.findMany({
-      where: {
-        creatorAddress: userAddress
-      }
-    });
+  // async findCreatedCommunities(userAddress: string) {
+  //   const communities = await this.prisma.community.findMany({
+  //     where: {
+  //       creatorAddress: userAddress
+  //     }
+  //   });
 
-    return communities;
-  }
-  async findHiddenCommunities(userAddress: string) {
-    const communities = await this.prisma.community.findMany({
-      where: {
-        creatorAddress: userAddress,
-        isHidden: true
-      }
-    });
+  //   return communities;
+  // }
+  // async findHiddenCommunities(userAddress: string) {
+  //   const communities = await this.prisma.community.findMany({
+  //     where: {
+  //       creatorAddress: userAddress,
+  //       isHidden: true
+  //     }
+  //   });
 
-    return communities;
-  }
+  //   return communities;
+  // }
 
   async findJoinnedCommunities(userAddress: string) {
     const communitiesAddresses = await this.prisma.communityMember.findMany({
       where: {
-        userAddress: userAddress
+        user_id: userAddress
       },
       select: {
-        communityAddress: true
+        community_id: true
       }
     });
 
     const communities = await this.prisma.community.findMany({
       where: {
-        communityAddress: {
-          in: communitiesAddresses.map(community => community.communityAddress)
+        id: {
+          in: communitiesAddresses.map(community => community.community_id)
         }
+      },
+      orderBy: {
+        id: 'desc'
       }
     });
-    return communities;
+
+    // Group by ID and take the latest entry for each ID, excluding hidden communities
+    const latestCommunities = Object.values(
+      communities.reduce((acc, community) => {
+        // Only keep non-hidden communities and first occurrence of each ID
+        if (!community.is_hidden && !acc[community.id]) {
+          acc[community.id] = community;
+        }
+        return acc;
+      }, {} as Record<string, typeof communities[0]>)
+    );
+
+    return latestCommunities;
   }
 
 }
