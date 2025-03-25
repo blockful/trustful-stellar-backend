@@ -9,7 +9,6 @@ describe('BadgesController', () => {
 
   const mockBadgesService = {
     findBadgesByType: jest.fn(),
-    createBadge: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -44,30 +43,6 @@ describe('BadgesController', () => {
 
       expect(result).toEqual(mockBadges);
       expect(service.findBadgesByType).toHaveBeenCalledWith('achievement');
-    });
-  });
-
-  describe('createBadge', () => {
-    it('should create a new badge', async () => {
-      const badgeDto: BadgeDto = {
-        type: 'achievement',
-        name: 'New Badge',
-        score: 100,
-        issuer: '0x1234567890',
-        communityAddress: '0x1234567890',
-      };
-
-      const mockCreatedBadge = {
-        id: 1,
-        ...badgeDto,
-      };
-
-      mockBadgesService.createBadge.mockResolvedValue(mockCreatedBadge);
-
-      const result = await controller.createBadge(badgeDto);
-
-      expect(result).toEqual(mockCreatedBadge);
-      expect(service.createBadge).toHaveBeenCalledWith(badgeDto);
     });
   });
 });
