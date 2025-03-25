@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,62 +8,76 @@ datasource db {
 }
 
 model Community {
-  communityAddress String   @id
-  factoryAddress   String
-  name             String
-  description      String
-  creatorAddress   String
-  isHidden         Boolean
-  blocktimestamp   DateTime
-  totalBadges      Int
-  lastIndexedAt    DateTime @updatedAt
+  community_address String     @unique
+  factory_address   String?
+  name              String
+  description       String?
+  icon              String?
+  creator_address   String
+  is_hidden         Boolean
+  blocktimestamp    Decimal    @db.Decimal
+  total_badges      Int
+  last_indexed_at   Decimal    @db.Decimal
+  id                String     @id @map("_id") @db.Uuid
 
-  // Relations
-  members  CommunityMember[]
-  managers CommunityManager[]
-  badges   Badge[]
+  @@map("communities")
 }
 
 model User {
-  userAddress String @id
+  user_address   String  @unique
+  id             String  @id @map("_id") @db.Uuid
 
-  // Relations
-  communities CommunityMember[]
+  @@map("users")
 }
 
 model CommunityMember {
-  id               Int      @id @default(autoincrement())
-  userAddress      String
-  isManager        Boolean  @default(false)
-  isCreator        Boolean  @default(false)
-  communityAddress String
-  points           Int
-  badges           Int
-  lastIndexedAt    DateTime @updatedAt
+  user_address      String
+  is_manager        Boolean
+  is_creator        Boolean
+  community_address String
+  last_indexed_at   Decimal  @db.Decimal
+  points            Int
+  user_id           String
+  community_id      String
+  id                String  @id @map("_id") @db.Uuid
 
-  // Relations
-  community Community @relation(fields: [communityAddress], references: [communityAddress])
-  user      User      @relation(fields: [userAddress], references: [userAddress])
-}
-
-model CommunityManager {
-  id               Int    @id @default(autoincrement())
-  managerAddress   String
-  communityAddress String
-
-  // Relations
-  community Community @relation(fields: [communityAddress], references: [communityAddress])
+  @@map("community_members")
 }
 
 model Badge {
-  issuer           String
-  communityAddress String
-  name             String
-  score            Int
-  type             String
+  issuer             String
+  community_address  String
+  name               String
+  score              Int
+  type               String
+  created_at         Decimal?  @db.Decimal
+  removed_at         Decimal?  @db.Decimal
+  community_id       String
+  id                 String    @id @map("_id") @db.Uuid
 
-  // Relations
-  community Community @relation(fields: [communityAddress], references: [communityAddress])
+  @@map("badges")
+}
 
-  @@id([issuer, communityAddress])
+model UserBadge {
+  user_address          String
+  issuer                String
+  community_address     String
+  name                  String
+  created_at            Decimal? @db.Decimal
+  user_id               String
+  badge_id              String
+  community_id          String
+  community_member_id   String
+  id                    String   @id @map("_id") @db.Uuid
+
+  @@map("user_badges")
+}
+
+model Metadata {
+  key         String   @id
+  value       Json?
+  createdAt   DateTime @db.Timestamptz(6)
+  updatedAt   DateTime @db.Timestamptz(6)
+
+  @@map("_metadata")
 }

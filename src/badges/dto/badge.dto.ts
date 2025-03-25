@@ -24,4 +24,10 @@ export class BadgeDto {
   @ApiProperty({ description: 'Badge type' })
   @IsString()
   type: string;
+
+  @ApiProperty({ required: false })
+  createdAt?: Date;
+
+  @ApiProperty({ required: false })
+  removedAt?: Date;
 } 

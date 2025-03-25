@@ -59,30 +59,4 @@ describe('BadgesService', () => {
       );
     });
   });
-
-  describe('createBadge', () => {
-    it('should create and return a new badge', async () => {
-      const badgeDto: BadgeDto = {
-        type: 'Custom',
-        name: 'New Badge',
-        score: 100,
-        issuer: '0x1234567890',
-        communityAddress: '0x1234567890',
-      };
-
-      const mockCreatedBadge = {
-        id: 1,
-        ...badgeDto,
-      };
-
-      mockPrismaService.badge.create.mockResolvedValue(mockCreatedBadge);
-
-      const result = await service.createBadge(badgeDto);
-
-      expect(result).toEqual(mockCreatedBadge);
-      expect(prisma.badge.create).toHaveBeenCalledWith({
-        data: badgeDto,
-      });
-    });
-  });
 });

@@ -19,10 +19,4 @@ export class BadgesService {
 
     return badges;
   }
-
-  async createBadge(badgeDto: BadgeDto) {
-    return this.prisma.badge.create({
-      data: badgeDto
-    });
-  }
 }

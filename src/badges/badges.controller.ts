@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Patch, Body } from '@nestjs/common';
 import { BadgesService } from './badges.service';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { BadgeDto } from '../communities/dto/badge.dto';
+import { BadgeDto } from './dto/badge.dto';
 
 @Controller('badges')
 export class BadgesController {
@@ -19,10 +19,5 @@ export class BadgesController {
   })
   async getBadgesByType(@Param('type') type: string) {
     return this.badgesService.findBadgesByType(type);
-  }
-
-  @Patch('/create')
-  async createBadge(@Body() badgeDto: BadgeDto) {
-    return this.badgesService.createBadge(badgeDto);
   }
 }
