@@ -5,10 +5,11 @@ import {
   Body,
   NotFoundException,
   Get,
+  Query,
 } from '@nestjs/common';
 import { CommunitiesService } from './communities.service';
 import { CreateCommunityDto } from './dto/create-community.dto';
-import { ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { UpdateHiddenStatusDto } from './dto/update-hidden-status.dto';
 import { BadgeDto } from './dto/badge.dto';
 
@@ -23,7 +24,13 @@ export class CommunitiesController {
     Retrieves a list of all visible communities in the network.
     Hidden communities are excluded from the results.
     Results are ordered by creation date (newest first).
+    If userAddress is provided, each community will include an isJoined field indicating if the user is a member.
     `
+  })
+  @ApiQuery({
+    name: 'userAddress',
+    required: false,
+    description: 'Stellar address of the user to check membership status'
   })
   @ApiResponse({
     status: 200,
@@ -43,14 +50,15 @@ export class CommunitiesController {
           totalMembers: 150,
           managers: [
             'GDUMR3GDVKYMABGVOQHVKNWMXHVYKZLTWWQZCDZV7GZVWPJVJAXKHXFX'
-          ]
+          ],
+          isJoined: true
         }]
       }
     }
   })
   @ApiResponse({ status: 500, description: 'Internal server error' })
-  async findAll(): Promise<CreateCommunityDto[]> {
-    return this.communitiesService.findAll();
+  async findAll(@Query('userAddress') userAddress?: string): Promise<CreateCommunityDto[]> {
+    return this.communitiesService.findAll(userAddress);
   }
 
   @Get(':communityAddress')
@@ -59,6 +67,7 @@ export class CommunitiesController {
     description: `
     Retrieves detailed information about a specific community.
     Includes member count, manager list, and other community details.
+    If userAddress is provided, the response will include an isJoined field indicating if the user is a member.
     `
   })
   @ApiParam({
@@ -66,6 +75,11 @@ export class CommunitiesController {
     description: 'Soroban contract address of the community',
     example: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
     required: true
+  })
+  @ApiQuery({
+    name: 'userAddress',
+    required: false,
+    description: 'Stellar address of the user to check membership status'
   })
   @ApiResponse({
     status: 200,
@@ -85,7 +99,8 @@ export class CommunitiesController {
           totalMembers: 150,
           managers: [
             'GDUMR3GDVKYMABGVOQHVKNWMXHVYKZLTWWQZCDZV7GZVWPJVJAXKHXFX'
-          ]
+          ],
+          isJoined: true
         }]
       }
     }
@@ -105,8 +120,9 @@ export class CommunitiesController {
   })
   async findOne(
     @Param('communityAddress') communityAddress: string,
+    @Query('userAddress') userAddress?: string,
   ): Promise<CreateCommunityDto> {
-    const community = await this.communitiesService.findOne(communityAddress);
+    const community = await this.communitiesService.findOne(communityAddress, userAddress);
     if (!community) {
       throw new NotFoundException('Community not found');
     }

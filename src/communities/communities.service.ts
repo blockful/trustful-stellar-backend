@@ -6,7 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class CommunitiesService {
   constructor(private prisma: PrismaService) { }
 
-  async findAll(): Promise<CreateCommunityDto[]> {
+  async findAll(userAddress?: string): Promise<CreateCommunityDto[]> {
     const communities = await this.prisma.community.findMany({
       where: {
         is_hidden: false,
@@ -31,8 +31,19 @@ export class CommunitiesService {
             user_address: true,
           },
         });
+
+        // Check if user is a member if userAddress is provided
+        let isJoined = false;
+        if (userAddress) {
+          const userMembership = await this.prisma.communityMember.findFirst({
+            where: {
+              community_address: community.community_address,
+              user_address: userAddress,
+            },
+          });
+          isJoined = !!userMembership;
+        }
         
-        // Return the DTO directly here
         return {
           communityAddress: community.community_address,
           factoryAddress: community.factory_address || '',
@@ -44,12 +55,13 @@ export class CommunitiesService {
           totalBadges: community.total_badges,
           totalMembers: membersCount,
           managers: managers.map(manager => manager.user_address),
+          isJoined,
         };
       })
     );
   }
 
-  async findOne(communityAddress: string): Promise<CreateCommunityDto> {
+  async findOne(communityAddress: string, userAddress?: string): Promise<CreateCommunityDto> {
     const community = await this.prisma.community.findFirst({
       where: {
         community_address: communityAddress,
@@ -78,6 +90,18 @@ export class CommunitiesService {
       },
     });
 
+    // Check if user is a member if userAddress is provided
+    let isJoined = false;
+    if (userAddress) {
+      const userMembership = await this.prisma.communityMember.findFirst({
+        where: {
+          community_address: communityAddress,
+          user_address: userAddress,
+        },
+      });
+      isJoined = !!userMembership;
+    }
+
     return {
       communityAddress: community.community_address,
       factoryAddress: community.factory_address || '',
@@ -89,6 +113,7 @@ export class CommunitiesService {
       totalBadges: community.total_badges,
       totalMembers: membersCount,
       managers: managers.map(manager => manager.user_address),
+      isJoined,
     };
   }
 

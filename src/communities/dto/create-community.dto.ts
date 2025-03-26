@@ -56,4 +56,11 @@ export class CreateCommunityDto {
   @IsArray()
   @IsString({ each: true })
   managers: string[];
+
+  @ApiProperty({
+    description: 'Whether the user is a member of this community',
+    required: false
+  })
+  @IsBoolean()
+  isJoined?: boolean;
 }
