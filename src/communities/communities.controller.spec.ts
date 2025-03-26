@@ -192,9 +192,9 @@ describe('CommunitiesController', () => {
     });
 
     it('should return badges of a community', async () => {
-      const result = await controller.getBadges(contractAddress);
+      const result = await controller.findBadges(contractAddress);
       expect(result).toEqual(mockBadges);
-      expect(service.findBadges).toHaveBeenCalledWith(contractAddress);
+      expect(service.findBadges).toHaveBeenCalledWith(contractAddress, undefined);
     });
   });
 

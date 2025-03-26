@@ -20,4 +20,21 @@ export class BadgesController {
   async getBadgesByType(@Param('type') type: string) {
     return this.badgesService.findBadgesByType(type);
   }
+
+  @Get('users/:user_address/communities/:community_address/badges')
+  @ApiOperation({
+    summary: 'Get user badges in a community',
+    description: 'Retrieves all badges that a user has in a specific community'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of badges retrieved successfully',
+    type: [BadgeDto]
+  })
+  async getUserCommunityBadges(
+    @Param('user_address') user_address: String,
+    @Param('community_address') community_address: String
+  ) {
+    return this.badgesService.returnCommunityBadgesThatTheUserHas(user_address, community_address);
+  }
 }

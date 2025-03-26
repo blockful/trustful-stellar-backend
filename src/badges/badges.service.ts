@@ -19,4 +19,16 @@ export class BadgesService {
 
     return badges;
   }
+
+  async returnCommunityBadgesThatTheUserHas(user_address: String, community_address: String){
+
+    const badgesThatUserHas = await this.prisma.userBadge.findMany({
+      where: {
+        user_address: user_address.toString(), 
+        community_address: community_address.toString()
+      }
+    })
+    return badgesThatUserHas;
+
+  }
 }

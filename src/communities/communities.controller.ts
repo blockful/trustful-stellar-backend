@@ -190,8 +190,16 @@ export class CommunitiesController {
     description: 'List of badges retrieved successfully',
     type: [BadgeDto]
   })
-  async getBadges(@Param('communityAddress') communityAddress: string) {
-    return this.communitiesService.findBadges(communityAddress);
+  @ApiQuery({
+    name: 'user_address',
+    required: false,
+    description: 'Stellar address of the user to check membership status'
+  })
+  async findBadges(
+    @Param('communityAddress') communityAddress: string,
+    @Query('user_address') user_address?: string
+  ) {
+    return this.communitiesService.findBadges(communityAddress, user_address);
   }
 
   @Get('/created/:userAddress')
