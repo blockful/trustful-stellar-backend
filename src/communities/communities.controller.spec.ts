@@ -89,7 +89,7 @@ describe('CommunitiesController', () => {
     it('should return a single community when given a valid contract address', async () => {
       const result = await controller.findOne(validContractAddress);
       expect(result).toEqual(mockCommunities[0]);
-      expect(service.findOne).toHaveBeenCalledWith(validContractAddress);
+      expect(service.findOne).toHaveBeenCalledWith(validContractAddress, undefined);
     });
 
     it('should throw NotFoundException when community is not found', async () => {
@@ -99,7 +99,7 @@ describe('CommunitiesController', () => {
       await expect(controller.findOne(invalidAddress)).rejects.toThrow(
         NotFoundException,
       );
-      expect(service.findOne).toHaveBeenCalledWith(invalidAddress);
+      expect(service.findOne).toHaveBeenCalledWith(invalidAddress, undefined);
     });
 
     it('should handle special characters in contract address', async () => {
@@ -110,7 +110,7 @@ describe('CommunitiesController', () => {
       await expect(controller.findOne(specialAddress)).rejects.toThrow(
         NotFoundException,
       );
-      expect(service.findOne).toHaveBeenCalledWith(specialAddress);
+      expect(service.findOne).toHaveBeenCalledWith(specialAddress, undefined);
     });
   });
 
