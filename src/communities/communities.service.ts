@@ -175,23 +175,11 @@ export class CommunitiesService {
   }
 
   async findBadges(communityAddress: string, user_address?: string) {
-    let badges;
-    let userBadges = [];
-    
-    badges = await this.prisma.badge.findMany({
+    const badges = await this.prisma.badge.findMany({
       where: {
         community_address: communityAddress
       }
     });
-
-    if (user_address) {
-      userBadges = await this.prisma.userBadge.findMany({
-        where: {
-          community_address: communityAddress,
-          user_address: user_address
-        }
-      });
-    }
 
     if (!badges.length) {
       throw new NotFoundException(
@@ -199,7 +187,7 @@ export class CommunitiesService {
       );
     }
 
-    return badges.map(badge => ({
+    const mappedBadges = badges.map(badge => ({
       issuer: badge.issuer,
       communityAddress: badge.community_address,
       name: badge.name,
@@ -207,13 +195,34 @@ export class CommunitiesService {
       type: badge.type,
       createdAt: badge.created_at ? new Date(Number(badge.created_at.toString())) : undefined,
       removedAt: badge.removed_at ? new Date(Number(badge.removed_at.toString())) : undefined,
-      ...(user_address && { 
-        userHas: userBadges.some(ub => 
+      ...(user_address && { userHas: false })
+    }));
+
+    if (user_address) {
+      const { badges_count, points } = await this.getUsersBadgeNumberAndPoints(user_address, communityAddress);
+      const userBadges = await this.prisma.userBadge.findMany({
+        where: {
+          community_address: communityAddress,
+          user_address: user_address
+        }
+      });
+
+      mappedBadges.forEach(badge => {
+        badge.userHas = userBadges.some(ub => 
           ub.name === badge.name && 
           ub.issuer === badge.issuer
-        ) 
-      })
-    }));
+        );
+      });
+
+      return {
+        badges_count,
+        users_points: points,
+        total_badges: badges.length,
+        community_badges: mappedBadges
+      };
+    }
+
+    return { total_badges: badges.length, community_badges: mappedBadges };
   }
 
   async findCreatedCommunities(userAddress: string) {
@@ -246,6 +255,15 @@ export class CommunitiesService {
       }
     });
 
+    const badges_by_community = new Map<string, number>();
+    const points_by_community = new Map<string, number>();
+
+    for (const community of communitiesAddresses) {
+      const { badges_count, points } = await this.getUsersBadgeNumberAndPoints(userAddress, community.community_address);
+      badges_by_community.set(community.community_address, badges_count);
+      points_by_community.set(community.community_address, points);
+    }
+
     const communities = await this.prisma.community.findMany({
       where: {
         community_address: {
@@ -253,7 +271,13 @@ export class CommunitiesService {
         }
       }
     });
-    return communities;
+
+    // Adicionar o número de badges a cada comunidade no retorno
+    return communities.map(community => ({
+      ...community,
+      users_badges_count: badges_by_community.get(community.community_address) || 0,
+      users_points: points_by_community.get(community.community_address) || 0
+    }));
   }
 
   async findUserBadges(userAddress: string) {
@@ -279,6 +303,28 @@ export class CommunitiesService {
       communityId: badge.community_id,
       communityMemberId: badge.community_member_id,
     }));
+  }
+
+  async getUsersBadgeNumberAndPoints(userAddress: string, community_address: any) {
+      const user_badges = await this.prisma.userBadge.findMany({
+        where: {
+          user_address: userAddress,
+          community_address: community_address
+        }
+      });
+
+      const points = await this.prisma.communityMember.findMany({
+        where: {
+          user_address: userAddress,
+          community_address: community_address
+        },
+        take: 1
+      });
+
+      return { 
+        badges_count: user_badges.length, 
+        points: points[0]?.points || 0 
+      };
   }
 
 }
