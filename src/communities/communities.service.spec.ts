@@ -21,6 +21,8 @@ describe('CommunitiesService', () => {
     _id: 'mock-uuid',
     id: 'mock-id',
     _block_range: '[1,)',
+    users_badges_count: 0,
+    users_points: 0
   };
 
   beforeEach(async () => {
@@ -256,12 +258,12 @@ describe('CommunitiesService', () => {
     it('should return all badges of a community', async () => {
       const result = await service.findBadges(communityAddress);
 
-      expect(result.length).toEqual(2);
-      expect(result[0].issuer).toEqual('ISSUER_1');
-      expect(result[0].communityAddress).toEqual('TEST_CONTRACT_ADDRESS');
-      expect(result[0].name).toEqual('Badge 1');
-      expect(result[0].score).toEqual(100);
-      expect(result[0].type).toEqual('Custom');
+      expect(result.community_badges.length).toEqual(2);
+      expect(result.community_badges[0].issuer).toEqual('ISSUER_1');
+      expect(result.community_badges[0].communityAddress).toEqual('TEST_CONTRACT_ADDRESS');
+      expect(result.community_badges[0].name).toEqual('Badge 1');
+      expect(result.community_badges[0].score).toEqual(100);
+      expect(result.community_badges[0].type).toEqual('Custom');
 
       expect(prismaService.badge.findMany).toHaveBeenCalledWith({
         where: { community_address: communityAddress }
