@@ -2,6 +2,7 @@ import { Controller, Get, Param, Patch, Body } from '@nestjs/common';
 import { BadgesService } from './badges.service';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { BadgeDto } from './dto/badge.dto';
+import { toLowerCaseAddress } from '../utils/address.utils';
 
 @Controller('badges')
 export class BadgesController {
@@ -35,6 +36,9 @@ export class BadgesController {
     @Param('user_address') user_address: String,
     @Param('community_address') community_address: String
   ) {
-    return this.badgesService.returnCommunityBadgesThatTheUserHas(user_address, community_address);
+    return this.badgesService.returnCommunityBadgesThatTheUserHas(
+      toLowerCaseAddress(user_address.toString()),
+      toLowerCaseAddress(community_address.toString())
+    );
   }
 }

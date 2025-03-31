@@ -15,12 +15,12 @@ describe('Communities (e2e)', () => {
   // Our mock community data representing what we expect from the database
   const mockCommunity = {
     community_address:
-      'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+      'cb5dqk6ddwrjhpwjhypqgfk4f4k7yzhx7iht6i4ico4pvifqb4rqaaaaaaaaaaaaaaaa',
     factory_address:
-      'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
+      'ccydnaovwshzuhdmxbpxkpohqw4fh44p26ngvfayunpwpunwpsxapbaaaaaaaaaaaaaaa',
     name: 'Test Community',
     description: 'Test Description',
-    creator_address: 'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
+    creator_address: 'gbvnnpofvv2ynxsqxdjpbvqyy7wjlhgpmlxzlhbz3y6hlkxqgfbpbzry',
     is_hidden: false,
     blocktimestamp: new Decimal('1620000000'),
     total_badges: 10,
@@ -29,12 +29,12 @@ describe('Communities (e2e)', () => {
   };
 
   const hiddenCommunity = {
-    community_address: 'HIDDEN_COMMUNITY_ADDRESS',
+    community_address: 'hidden_community_address',
     is_hidden: true,
-    factory_address: 'FACTORY_ADDRESS',
+    factory_address: 'factory_address',
     name: 'Hidden Community',
     description: 'Hidden Description',
-    creator_address: 'CREATOR_ADDRESS',
+    creator_address: 'creator_address',
     blocktimestamp: new Decimal('1620000000'),
     total_badges: 0,
     last_indexed_at: new Decimal('1620000000'),
@@ -80,8 +80,8 @@ describe('Communities (e2e)', () => {
       communityMember: {
         count: jest.fn().mockReturnValue(5),
         findMany: jest.fn().mockReturnValue([
-          { user_address: 'MANAGER_1' },
-          { user_address: 'MANAGER_2' }
+          { user_address: 'manager_1' },
+          { user_address: 'manager_2' }
         ]),
       },
     };
@@ -140,7 +140,7 @@ describe('Communities (e2e)', () => {
     });
 
     it('should return 404 when community is not found', () => {
-      const nonExistentAddress = 'NONEXISTENTADDRESS';
+      const nonExistentAddress = 'nonexistentaddress';
 
       return request(app.getHttpServer())
         .get(`/communities/${nonExistentAddress}`)
@@ -161,7 +161,7 @@ describe('Communities (e2e)', () => {
     });
 
     it('should return 404 when community not found', () => {
-      const nonExistentAddress = 'NONEXISTENTADDRESS';
+      const nonExistentAddress = 'nonexistentaddress';
 
       return request(app.getHttpServer())
         .patch(`/communities/${nonExistentAddress}/visibility`)

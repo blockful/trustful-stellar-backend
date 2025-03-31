@@ -12,6 +12,7 @@ import { CreateCommunityDto } from './dto/create-community.dto';
 import { ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { UpdateHiddenStatusDto } from './dto/update-hidden-status.dto';
 import { BadgeDto } from './dto/badge.dto';
+import { toLowerCaseAddress } from '../utils/address.utils';
 
 @Controller('communities')
 export class CommunitiesController {
@@ -58,7 +59,7 @@ export class CommunitiesController {
   })
   @ApiResponse({ status: 500, description: 'Internal server error' })
   async findAll(@Query('userAddress') userAddress?: string): Promise<CreateCommunityDto[]> {
-    return this.communitiesService.findAll(userAddress);
+    return this.communitiesService.findAll(userAddress ? toLowerCaseAddress(userAddress) : undefined);
   }
 
   @Get(':communityAddress')
@@ -122,7 +123,10 @@ export class CommunitiesController {
     @Param('communityAddress') communityAddress: string,
     @Query('userAddress') userAddress?: string,
   ): Promise<CreateCommunityDto> {
-    const community = await this.communitiesService.findOne(communityAddress, userAddress);
+    const community = await this.communitiesService.findOne(
+      toLowerCaseAddress(communityAddress),
+      userAddress ? toLowerCaseAddress(userAddress) : undefined
+    );
     if (!community) {
       throw new NotFoundException('Community not found');
     }
@@ -160,7 +164,7 @@ export class CommunitiesController {
     @Body() updateHiddenStatusDto: UpdateHiddenStatusDto,
   ): Promise<CreateCommunityDto> {
     const updatedCommunity = await this.communitiesService.updateVisibility(
-      communityAddress,
+      toLowerCaseAddress(communityAddress),
       updateHiddenStatusDto.isHidden,
     );
 
@@ -177,7 +181,7 @@ export class CommunitiesController {
     description: 'Retrieves all members of a specific community'
   })
   async getMembers(@Param('communityAddress') communityAddress: string) {
-    return this.communitiesService.findMembers(communityAddress);
+    return this.communitiesService.findMembers(toLowerCaseAddress(communityAddress));
   }
 
   @Get(':communityAddress/badges')
@@ -199,19 +203,36 @@ export class CommunitiesController {
     @Param('communityAddress') communityAddress: string,
     @Query('user_address') user_address?: string
   ) {
-    return this.communitiesService.findBadges(communityAddress, user_address);
+    return this.communitiesService.findBadges(
+      toLowerCaseAddress(communityAddress),
+      user_address ? toLowerCaseAddress(user_address) : undefined
+    );
   }
 
-  @Get('/created/:userAddress')
+  @Get('created/:userAddress')
+  @ApiOperation({
+    summary: 'Get created communities',
+    description: 'Retrieves all communities created by a specific user'
+  })
   async getCreatedCommunities(@Param('userAddress') userAddress: string) {
-    return this.communitiesService.findCreatedCommunities(userAddress);
+    return this.communitiesService.findCreatedCommunities(toLowerCaseAddress(userAddress));
   }
-  @Get('/hidden/:userAddress')
+
+  @Get('hidden/:userAddress')
+  @ApiOperation({
+    summary: 'Get hidden communities',
+    description: 'Retrieves all hidden communities for a specific user'
+  })
   async getHiddenCommunities(@Param('userAddress') userAddress: string) {
-    return this.communitiesService.findHiddenCommunities(userAddress);
+    return this.communitiesService.findHiddenCommunities(toLowerCaseAddress(userAddress));
   }
-  @Get('/joined/:userAddress')
+
+  @Get('joined/:userAddress')
+  @ApiOperation({
+    summary: 'Get joined communities',
+    description: 'Retrieves all communities that a specific user has joined'
+  })
   async getJoinedCommunities(@Param('userAddress') userAddress: string) {
-    return this.communitiesService.findJoinnedCommunities(userAddress);
+    return this.communitiesService.findJoinnedCommunities(toLowerCaseAddress(userAddress));
   }
 }
