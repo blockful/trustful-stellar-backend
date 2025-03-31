@@ -308,15 +308,15 @@ export class CommunitiesService {
   async getUsersBadgeNumberAndPoints(userAddress: string, community_address: any) {
       const user_badges = await this.prisma.userBadge.findMany({
         where: {
-          user_address: userAddress.toLowerCase(),
-          community_address: community_address.toLowerCase()
+          user_address: userAddress,
+          community_address: community_address
         }
       });
 
       const points = await this.prisma.communityMember.findMany({
         where: {
-          user_address: userAddress.toLowerCase(),
-          community_address: community_address.toLowerCase()
+          user_address: userAddress,
+          community_address: community_address
         },
         take: 1
       });
