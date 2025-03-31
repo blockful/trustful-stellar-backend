@@ -12,20 +12,20 @@ describe('CommunitiesController', () => {
   const mockCommunities: CreateCommunityDto[] = [
     {
       communityAddress:
-        'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+        'cb5dqk6ddwrjhpwjhypqgfk4f4k7yzhx7iht6i4ico4pvifqb4rqaaaaaaaaaaaaaaaa',
       factoryAddress:
-        'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
+        'ccydnaovwshzuhdmxbpkpqhw4fh44p26ngvfayunpwpunwpsxapbaaaaaaaaaaaaaaa',
       name: 'Test Community',
       description: 'Test Description',
       creatorAddress:
-        'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY...',
+        'gbvnnpofvv2ynxsqxdjpbvqyy7wjlhgpmlxzlhbz3y6hlkxqgfbpbzry...',
       isHidden: false,
       blocktimestamp: new Date(),
       totalBadges: 10,
       totalMembers: 5,
       managers: [
-        'GDUMR3GDVKYMABGVOQHVKNWMXHVYKZLTWWQZCDZV7GZVWPJVJAXKHXFX',
-        'GDZAP3QWXBZAPILZBCJ5LYIJYVXZSNJ4WCYCNHBQPQHCJX2RNXRUMMZN',
+        'gdumr3gdvkyamabgvoqhvknwmxhvykzltwwqcdzv7gzvwpjvjaxkhxfx',
+        'gdzap3qwxbzapilzbcj5lyijyvxzsjn4wcycnhbqpqhcjx2rnxrummzn',
       ],
     },
   ];
@@ -84,7 +84,7 @@ describe('CommunitiesController', () => {
 
   describe('findOne', () => {
     const validContractAddress =
-      'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA';
+      'cb5dqk6ddwrjhpwjhypqgfk4f4k7yzhx7iht6i4ico4pvifqb4rqaaaaaaaaaaaaaaaa';
 
     it('should return a single community when given a valid contract address', async () => {
       const result = await controller.findOne(validContractAddress);
@@ -93,7 +93,7 @@ describe('CommunitiesController', () => {
     });
 
     it('should throw NotFoundException when community is not found', async () => {
-      const invalidAddress = 'INVALID_ADDRESS';
+      const invalidAddress = 'invalid_address';
       jest.spyOn(service, 'findOne').mockResolvedValueOnce(null);
 
       await expect(controller.findOne(invalidAddress)).rejects.toThrow(
@@ -104,7 +104,7 @@ describe('CommunitiesController', () => {
 
     it('should handle special characters in contract address', async () => {
       const specialAddress =
-        'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAA...';
+        'cb5dqk6ddwrjhpwjhypqgfk4f4k7yzhx7iht6i4ico4pvifqb4rqaa...';
       jest.spyOn(service, 'findOne').mockResolvedValueOnce(null);
 
       await expect(controller.findOne(specialAddress)).rejects.toThrow(
@@ -123,9 +123,10 @@ describe('CommunitiesController', () => {
       await expect(controller.findAll()).rejects.toThrow('Database error');
     });
   });
+
   describe('updateVisibility', () => {
     const contractAddress =
-      'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA';
+      'cb5dqk6ddwrjhpwjhypqgfk4f4k7yzhx7iht6i4ico4pvifqb4rqaaaaaaaaaaaaaaaa';
 
     beforeEach(() => {
       service.updateVisibility = jest.fn().mockResolvedValue({
@@ -156,12 +157,12 @@ describe('CommunitiesController', () => {
   });
 
   describe('getMembers', () => {
-    const contractAddress = 'TEST_CONTRACT_ADDRESS';
+    const contractAddress = 'test_contract_address';
     const mockMembers = [
       {
-        userAddress: 'USER_1',
+        userAddress: 'user_1',
         contractAddress,
-        user: { userAddress: 'USER_1' }
+        user: { userAddress: 'user_1' }
       }
     ];
 
@@ -177,10 +178,10 @@ describe('CommunitiesController', () => {
   });
 
   describe('getBadges', () => {
-    const contractAddress = 'TEST_CONTRACT_ADDRESS';
+    const contractAddress = 'test_contract_address';
     const mockBadges = [
       {
-        issuer: 'ISSUER_1',
+        issuer: 'issuer_1',
         contractAddress,
         name: 'Badge 1',
         score: 100
@@ -199,7 +200,7 @@ describe('CommunitiesController', () => {
   });
 
   describe('getCreatedCommunities', () => {
-    const userAddress = 'TEST_USER_ADDRESS';
+    const userAddress = 'test_user_address';
     const mockCreatedCommunities = [mockCommunities[0]];
 
     beforeEach(() => {
@@ -214,11 +215,8 @@ describe('CommunitiesController', () => {
   });
 
   describe('getHiddenCommunities', () => {
-    const userAddress = 'TEST_USER_ADDRESS';
-    const mockHiddenCommunities = [{
-      ...mockCommunities[0],
-      isHidden: true
-    }];
+    const userAddress = 'test_user_address';
+    const mockHiddenCommunities = [mockCommunities[0]];
 
     beforeEach(() => {
       service.findHiddenCommunities = jest.fn().mockResolvedValue(mockHiddenCommunities);
@@ -232,7 +230,7 @@ describe('CommunitiesController', () => {
   });
 
   describe('getJoinedCommunities', () => {
-    const userAddress = 'TEST_USER_ADDRESS';
+    const userAddress = 'test_user_address';
     const mockJoinedCommunities = [mockCommunities[0]];
 
     beforeEach(() => {
