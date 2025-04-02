@@ -11,12 +11,12 @@ export class CreateCommunityDto {
   @ApiProperty({ description: 'Soroban contract address for the community' })
   @IsNotEmpty()
   @IsString()
-  communityAddress: string;
+  community_address: string;
 
   @ApiProperty({ description: 'Soroban factory contract address' })
   @IsNotEmpty()
   @IsString()
-  factoryAddress: string;
+  factory_address: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -31,11 +31,11 @@ export class CreateCommunityDto {
   @ApiProperty({ description: 'Stellar address of the community creator' })
   @IsNotEmpty()
   @IsString()
-  creatorAddress: string;
+  creator_address: string;
 
   @ApiProperty()
   @IsBoolean()
-  isHidden: boolean;
+  is_hidden: boolean;
 
   @ApiProperty()
   blocktimestamp: Date;
@@ -44,11 +44,11 @@ export class CreateCommunityDto {
     description: 'Total number of badges defined in the contract',
   })
   @IsNumber()
-  totalBadges: number;
+  total_badges: number;
 
   @ApiProperty()
   @IsNumber()
-  totalMembers: number;
+  total_members: number;
 
   @ApiProperty({
     description: 'Array of Stellar addresses for community managers',
@@ -62,5 +62,5 @@ export class CreateCommunityDto {
     required: false
   })
   @IsBoolean()
-  isJoined?: boolean;
+  is_joined?: boolean;
 }
