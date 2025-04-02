@@ -112,29 +112,29 @@ describe('Communities (e2e)', () => {
         .expect((res) => {
           expect(res.body).toBeInstanceOf(Array);
           expect(res.body[0]).toMatchObject({
-            communityAddress: mockCommunity.community_address,
+            community_address: mockCommunity.community_address,
             name: mockCommunity.name,
-            totalBadges: mockCommunity.total_badges,
+            total_badges: mockCommunity.total_badges,
           });
         });
     });
   });
 
   // Testing our GET /communities/:contractAddress endpoint
-  describe('/communities/:contractAddress (GET)', () => {
+  describe('/communities/:community_address (GET)', () => {
     it('should return a specific community when given a valid contract address', () => {
       return request(app.getHttpServer())
         .get(`/communities/${mockCommunity.community_address}`)
         .expect(200)
         .expect((res) => {
           expect(res.body).toMatchObject({
-            communityAddress: mockCommunity.community_address,
-            factoryAddress: mockCommunity.factory_address,
+            community_address: mockCommunity.community_address,
+            factory_address: mockCommunity.factory_address,
             name: mockCommunity.name,
             description: mockCommunity.description,
-            creatorAddress: mockCommunity.creator_address,
-            isHidden: mockCommunity.is_hidden,
-            totalBadges: mockCommunity.total_badges,
+            creator_address: mockCommunity.creator_address,
+            is_hidden: mockCommunity.is_hidden,
+            total_badges: mockCommunity.total_badges,
           });
         });
     });
@@ -148,15 +148,15 @@ describe('Communities (e2e)', () => {
     });
   });
 
-  describe('/communities/:contractAddress/visibility (PATCH)', () => {
+  describe('/communities/:community_address/visibility (PATCH)', () => {
     it('should update community visibility status', async () => {
       return request(app.getHttpServer())
         .patch(`/communities/${mockCommunity.community_address}/visibility`)
-        .send({ isHidden: true })
+        .send({ is_hidden: true })
         .expect(200)
         .expect((res) => {
-          expect(res.body.isHidden).toBe(true);
-          expect(res.body.communityAddress).toBe(mockCommunity.community_address);
+          expect(res.body.is_hidden).toBe(true);
+          expect(res.body.community_address).toBe(mockCommunity.community_address);
         });
     });
 
@@ -165,7 +165,7 @@ describe('Communities (e2e)', () => {
 
       return request(app.getHttpServer())
         .patch(`/communities/${nonExistentAddress}/visibility`)
-        .send({ isHidden: true })
+        .send({ is_hidden: true })
         .expect(404);
     });
   });
