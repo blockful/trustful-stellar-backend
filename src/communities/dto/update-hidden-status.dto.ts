@@ -7,5 +7,5 @@ export class UpdateHiddenStatusDto {
     example: true,
   })
   @IsBoolean()
-  isHidden: boolean;
+  is_hidden: boolean;
 }

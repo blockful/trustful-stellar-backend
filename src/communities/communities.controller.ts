@@ -25,11 +25,11 @@ export class CommunitiesController {
     Retrieves a list of all visible communities in the network.
     Hidden communities are excluded from the results.
     Results are ordered by creation date (newest first).
-    If userAddress is provided, each community will include an isJoined field indicating if the user is a member.
+    If user_address is provided, each community will include an is_joined field indicating if the user is a member.
     `
   })
   @ApiQuery({
-    name: 'userAddress',
+    name: 'user_address',
     required: false,
     description: 'Stellar address of the user to check membership status'
   })
@@ -40,45 +40,45 @@ export class CommunitiesController {
     content: {
       'application/json': {
         example: [{
-          communityAddress: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
-          factoryAddress: 'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
+          community_address: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+          factory_address: 'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
           name: 'Stellar Developers Community',
           description: 'A community for Stellar blockchain developers',
-          creatorAddress: 'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
-          isHidden: false,
+          creator_address: 'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
+          is_hidden: false,
           blocktimestamp: '2024-01-23T12:00:00Z',
-          totalBadges: 5,
-          totalMembers: 150,
+          total_badges: 5,
+          total_members: 150,
           managers: [
             'GDUMR3GDVKYMABGVOQHVKNWMXHVYKZLTWWQZCDZV7GZVWPJVJAXKHXFX'
           ],
-          isJoined: true
+          is_joined: true
         }]
       }
     }
   })
   @ApiResponse({ status: 500, description: 'Internal server error' })
-  async findAll(@Query('userAddress') userAddress?: string): Promise<CreateCommunityDto[]> {
-    return this.communitiesService.findAll(userAddress ? toLowerCaseAddress(userAddress) : undefined);
+  async findAll(@Query('user_address') user_address?: string): Promise<CreateCommunityDto[]> {
+    return this.communitiesService.findAll(user_address ? toLowerCaseAddress(user_address) : undefined);
   }
 
-  @Get(':communityAddress')
+  @Get(':community_address')
   @ApiOperation({
     summary: 'Get community details',
     description: `
     Retrieves detailed information about a specific community.
     Includes member count, manager list, and other community details.
-    If userAddress is provided, the response will include an isJoined field indicating if the user is a member.
+    If user_address is provided, the response will include an is_joined field indicating if the user is a member.
     `
   })
   @ApiParam({
-    name: 'communityAddress',
+    name: 'community_address',
     description: 'Soroban contract address of the community',
     example: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
     required: true
   })
   @ApiQuery({
-    name: 'userAddress',
+    name: 'user_address',
     required: false,
     description: 'Stellar address of the user to check membership status'
   })
@@ -89,19 +89,19 @@ export class CommunitiesController {
     content: {
       'application/json': {
         example: [{
-          communityAddress: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
-          factoryAddress: 'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
+          community_address: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+          factory_address: 'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
           name: 'Stellar Developers Community',
           description: 'A community for Stellar blockchain developers',
-          creatorAddress: 'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
-          isHidden: false,
+          creator_address: 'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
+          is_hidden: false,
           blocktimestamp: '2024-01-23T12:00:00Z',
-          totalBadges: 5,
-          totalMembers: 150,
+          total_badges: 5,
+          total_members: 150,
           managers: [
             'GDUMR3GDVKYMABGVOQHVKNWMXHVYKZLTWWQZCDZV7GZVWPJVJAXKHXFX'
           ],
-          isJoined: true
+          is_joined: true
         }]
       }
     }
@@ -120,12 +120,12 @@ export class CommunitiesController {
     }
   })
   async findOne(
-    @Param('communityAddress') communityAddress: string,
-    @Query('userAddress') userAddress?: string,
+    @Param('community_address') community_address: string,
+    @Query('user_address') user_address?: string,
   ): Promise<CreateCommunityDto> {
     const community = await this.communitiesService.findOne(
-      toLowerCaseAddress(communityAddress),
-      userAddress ? toLowerCaseAddress(userAddress) : undefined
+      toLowerCaseAddress(community_address),
+      user_address ? toLowerCaseAddress(user_address) : undefined
     );
     if (!community) {
       throw new NotFoundException('Community not found');
@@ -133,7 +133,7 @@ export class CommunitiesController {
     return community;
   }
 
-  @Patch(':communityAddress/visibility')
+  @Patch(':community_address/visibility')
   @ApiOperation({
     summary: 'Update community visibility',
     description: `
@@ -143,7 +143,7 @@ export class CommunitiesController {
     `
   })
   @ApiParam({
-    name: 'communityAddress',
+    name: 'community_address',
     required: true,
     description: 'Soroban contract address of the community to update'
   })
@@ -153,19 +153,19 @@ export class CommunitiesController {
     content: {
       'application/json': {
         example: {
-          communityAddress: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
-          isHidden: true,
+          community_address: 'CB5DQK6DDWRJHPWJHYPQGFK4F4K7YZHX7IHT6I4ICO4PVIFQB4RQAAAAAAAAAAAAAAAA',
+          is_hidden: true,
         }
       }
     }
   })
   async updateVisibility(
-    @Param('communityAddress') communityAddress: string,
+    @Param('community_address') community_address: string,
     @Body() updateHiddenStatusDto: UpdateHiddenStatusDto,
   ): Promise<CreateCommunityDto> {
     const updatedCommunity = await this.communitiesService.updateVisibility(
-      toLowerCaseAddress(communityAddress),
-      updateHiddenStatusDto.isHidden,
+      toLowerCaseAddress(community_address),
+      updateHiddenStatusDto.is_hidden,
     );
 
     if (!updatedCommunity) {
@@ -175,16 +175,16 @@ export class CommunitiesController {
     return updatedCommunity;
   }
 
-  @Get(':communityAddress/members')
+  @Get(':community_address/members')
   @ApiOperation({
     summary: 'Get community members',
     description: 'Retrieves all members of a specific community'
   })
-  async getMembers(@Param('communityAddress') communityAddress: string) {
-    return this.communitiesService.findMembers(toLowerCaseAddress(communityAddress));
+  async getMembers(@Param('community_address') community_address: string) {
+    return this.communitiesService.findMembers(toLowerCaseAddress(community_address));
   }
 
-  @Get(':communityAddress/badges')
+  @Get(':community_address/badges')
   @ApiOperation({
     summary: 'Get community badges',
     description: 'Retrieves all badges from a specific community'
@@ -200,39 +200,39 @@ export class CommunitiesController {
     description: 'Stellar address of the user to check membership status'
   })
   async findBadges(
-    @Param('communityAddress') communityAddress: string,
+    @Param('community_address') community_address: string,
     @Query('user_address') user_address?: string
   ) {
     return this.communitiesService.findBadges(
-      toLowerCaseAddress(communityAddress),
+      toLowerCaseAddress(community_address),
       user_address ? toLowerCaseAddress(user_address) : undefined
     );
   }
 
-  @Get('created/:userAddress')
+  @Get('created/:user_address')
   @ApiOperation({
     summary: 'Get created communities',
     description: 'Retrieves all communities created by a specific user'
   })
-  async getCreatedCommunities(@Param('userAddress') userAddress: string) {
-    return this.communitiesService.findCreatedCommunities(toLowerCaseAddress(userAddress));
+  async getCreatedCommunities(@Param('user_address') user_address: string) {
+    return this.communitiesService.findCreatedCommunities(toLowerCaseAddress(user_address));
   }
 
-  @Get('hidden/:userAddress')
+  @Get('hidden/:user_address')
   @ApiOperation({
     summary: 'Get hidden communities',
     description: 'Retrieves all hidden communities for a specific user'
   })
-  async getHiddenCommunities(@Param('userAddress') userAddress: string) {
-    return this.communitiesService.findHiddenCommunities(toLowerCaseAddress(userAddress));
+  async getHiddenCommunities(@Param('user_address') user_address: string) {
+    return this.communitiesService.findHiddenCommunities(toLowerCaseAddress(user_address));
   }
 
-  @Get('joined/:userAddress')
+  @Get('joined/:user_address')
   @ApiOperation({
     summary: 'Get joined communities',
     description: 'Retrieves all communities that a specific user has joined'
   })
-  async getJoinedCommunities(@Param('userAddress') userAddress: string) {
-    return this.communitiesService.findJoinnedCommunities(toLowerCaseAddress(userAddress));
+  async getJoinedCommunities(@Param('user_address') user_address: string) {
+    return this.communitiesService.findJoinnedCommunities(toLowerCaseAddress(user_address));
   }
 }
