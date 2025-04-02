@@ -101,13 +101,13 @@ describe('CommunitiesService', () => {
       const result = await service.findAll();
 
       expect(result[0]).toEqual(expect.objectContaining({
-        communityAddress: mockPrismaResponse.community_address,
-        factoryAddress: mockPrismaResponse.factory_address,
+        community_address: mockPrismaResponse.community_address,
+        factory_address: mockPrismaResponse.factory_address,
         name: mockPrismaResponse.name,
         description: mockPrismaResponse.description,
-        creatorAddress: mockPrismaResponse.creator_address,
-        isHidden: mockPrismaResponse.is_hidden,
-        totalBadges: mockPrismaResponse.total_badges,
+        creator_address: mockPrismaResponse.creator_address,
+        is_hidden: mockPrismaResponse.is_hidden,
+        total_badges: mockPrismaResponse.total_badges,
       }));
 
       expect(prismaService.community.findMany).toHaveBeenCalledWith({
@@ -128,13 +128,13 @@ describe('CommunitiesService', () => {
       const result = await service.findOne(communityAddress);
 
       expect(result).toEqual(expect.objectContaining({
-        communityAddress: mockPrismaResponse.community_address,
-        factoryAddress: mockPrismaResponse.factory_address,
+        community_address: mockPrismaResponse.community_address,
+        factory_address: mockPrismaResponse.factory_address,
         name: mockPrismaResponse.name,
         description: mockPrismaResponse.description,
-        creatorAddress: mockPrismaResponse.creator_address,
-        isHidden: mockPrismaResponse.is_hidden,
-        totalBadges: mockPrismaResponse.total_badges,
+        creator_address: mockPrismaResponse.creator_address,
+        is_hidden: mockPrismaResponse.is_hidden,
+        total_badges: mockPrismaResponse.total_badges,
       }));
 
       expect(prismaService.community.findFirst).toHaveBeenCalledWith({
@@ -165,7 +165,7 @@ describe('CommunitiesService', () => {
 
       const result = await service.updateVisibility(communityAddress, true);
 
-      expect(result.isHidden).toBe(true);
+      expect(result.is_hidden).toBe(true);
       expect(prismaService.community.updateMany).toHaveBeenCalledWith({
         where: { community_address: communityAddress },
         data: { is_hidden: true },
@@ -210,8 +210,8 @@ describe('CommunitiesService', () => {
       const result = await service.findMembers(communityAddress);
 
       expect(result.length).toEqual(2);
-      expect(result[0]).toHaveProperty('userAddress', 'USER_1');
-      expect(result[0]).toHaveProperty('isManager', true);
+      expect(result[0]).toHaveProperty('user_address', 'USER_1');
+      expect(result[0]).toHaveProperty('is_manager', true);
 
       expect(prismaService.communityMember.findMany).toHaveBeenCalledWith({
         where: { community_address: communityAddress },
@@ -260,7 +260,7 @@ describe('CommunitiesService', () => {
 
       expect(result.community_badges.length).toEqual(2);
       expect(result.community_badges[0].issuer).toEqual('ISSUER_1');
-      expect(result.community_badges[0].communityAddress).toEqual('TEST_CONTRACT_ADDRESS');
+      expect(result.community_badges[0].community_address).toEqual('TEST_CONTRACT_ADDRESS');
       expect(result.community_badges[0].name).toEqual('Badge 1');
       expect(result.community_badges[0].score).toEqual(100);
       expect(result.community_badges[0].type).toEqual('Custom');
@@ -368,13 +368,13 @@ describe('CommunitiesService', () => {
     it('should return all badges of a user', async () => {
       const result = await service.findUserBadges(userAddress);
 
-      expect(result[0].userAddress).toEqual(userAddress);
+      expect(result[0].user_address).toEqual(userAddress);
       expect(result[0].issuer).toEqual('ISSUER_1');
-      expect(result[0].communityAddress).toEqual('TEST_CONTRACT_ADDRESS');
+      expect(result[0].community_address).toEqual('TEST_CONTRACT_ADDRESS');
       expect(result[0].name).toEqual('Badge 1');
-      expect(result[0].badgeId).toEqual('badge-id-1');
-      expect(result[0].communityId).toEqual('community-id-1');
-      expect(result[0].communityMemberId).toEqual('community-member-id-1');
+      expect(result[0].badge_id).toEqual('badge-id-1');
+      expect(result[0].community_id).toEqual('community-id-1');
+      expect(result[0].community_member_id).toEqual('community-member-id-1');
 
       expect(prismaService.userBadge.findMany).toHaveBeenCalledWith({
         where: { user_address: userAddress }

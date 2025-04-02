@@ -11,18 +11,18 @@ describe('CommunitiesController', () => {
 
   const mockCommunities: CreateCommunityDto[] = [
     {
-      communityAddress:
+      community_address:
         'cb5dqk6ddwrjhpwjhypqgfk4f4k7yzhx7iht6i4ico4pvifqb4rqaaaaaaaaaaaaaaaa',
-      factoryAddress:
+      factory_address:
         'ccydnaovwshzuhdmxbpkpqhw4fh44p26ngvfayunpwpunwpsxapbaaaaaaaaaaaaaaa',
       name: 'Test Community',
       description: 'Test Description',
-      creatorAddress:
+      creator_address:
         'gbvnnpofvv2ynxsqxdjpbvqyy7wjlhgpmlxzlhbz3y6hlkxqgfbpbzry...',
-      isHidden: false,
+      is_hidden: false,
       blocktimestamp: new Date(),
-      totalBadges: 10,
-      totalMembers: 5,
+      total_badges: 10,
+      total_members: 5,
       managers: [
         'gdumr3gdvkyamabgvoqhvknwmxhvykzltwwqcdzv7gzvwpjvjaxkhxfx',
         'gdzap3qwxbzapilzbcj5lyijyvxzsjn4wcycnhbqpqhcjx2rnxrummzn',
@@ -41,7 +41,7 @@ describe('CommunitiesController', () => {
             findOne: jest.fn().mockImplementation((communityAddress) => {
               return Promise.resolve(
                 mockCommunities.find(
-                  (c) => c.communityAddress === communityAddress,
+                  (c) => c.community_address === communityAddress,
                 ) || null,
               );
             }),
@@ -131,16 +131,16 @@ describe('CommunitiesController', () => {
     beforeEach(() => {
       service.updateVisibility = jest.fn().mockResolvedValue({
         ...mockCommunities[0],
-        isHidden: true,
+        is_hidden: true,
       });
     });
 
     it('should update community visibility', async () => {
       const result = await controller.updateVisibility(contractAddress, {
-        isHidden: true,
+        is_hidden: true,
       });
 
-      expect(result.isHidden).toBe(true);
+      expect(result.is_hidden).toBe(true);
       expect(service.updateVisibility).toHaveBeenCalledWith(
         contractAddress,
         true,
@@ -151,7 +151,7 @@ describe('CommunitiesController', () => {
       service.updateVisibility = jest.fn().mockResolvedValue(null);
 
       await expect(
-        controller.updateVisibility(contractAddress, { isHidden: true }),
+        controller.updateVisibility(contractAddress, { is_hidden: true }),
       ).rejects.toThrow(NotFoundException);
     });
   });
@@ -160,9 +160,9 @@ describe('CommunitiesController', () => {
     const contractAddress = 'test_contract_address';
     const mockMembers = [
       {
-        userAddress: 'user_1',
-        contractAddress,
-        user: { userAddress: 'user_1' }
+        user_address: 'user_1',
+        community_address: contractAddress,
+        user: { user_address: 'user_1' }
       }
     ];
 
@@ -182,7 +182,7 @@ describe('CommunitiesController', () => {
     const mockBadges = [
       {
         issuer: 'issuer_1',
-        contractAddress,
+        community_address: contractAddress,
         name: 'Badge 1',
         score: 100
       }

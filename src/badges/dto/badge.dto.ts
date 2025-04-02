@@ -10,7 +10,7 @@ export class BadgeDto {
   @ApiProperty({ description: 'Community contract address' })
   @IsNotEmpty()
   @IsString()
-  communityAddress: string;
+  community_address: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -26,8 +26,8 @@ export class BadgeDto {
   type: string;
 
   @ApiProperty({ required: false })
-  createdAt?: Date;
+  created_at?: Date;
 
   @ApiProperty({ required: false })
-  removedAt?: Date;
+  removed_at?: Date;
 } 

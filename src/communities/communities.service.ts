@@ -33,7 +33,7 @@ export class CommunitiesService {
         });
 
         // Check if user is a member if userAddress is provided
-        let isJoined = false;
+        let is_joined = false;
         if (userAddress) {
           const userMembership = await this.prisma.communityMember.findFirst({
             where: {
@@ -41,21 +41,21 @@ export class CommunitiesService {
               user_address: userAddress,
             },
           });
-          isJoined = !!userMembership;
+          is_joined = !!userMembership;
         }
         
         return {
-          communityAddress: community.community_address,
-          factoryAddress: community.factory_address || '',
+          community_address: community.community_address,
+          factory_address: community.factory_address || '',
           name: community.name,
           description: community.description || '',
-          creatorAddress: community.creator_address,
-          isHidden: community.is_hidden,
+          creator_address: community.creator_address,
+          is_hidden: community.is_hidden,
           blocktimestamp: new Date(Number(community.blocktimestamp.toString())),
-          totalBadges: community.total_badges,
-          totalMembers: membersCount,
+          total_badges: community.total_badges,
+          total_members: membersCount,
           managers: managers.map(manager => manager.user_address),
-          isJoined,
+          is_joined,
         };
       })
     );
@@ -91,7 +91,7 @@ export class CommunitiesService {
     });
 
     // Check if user is a member if userAddress is provided
-    let isJoined = false;
+    let is_joined = false;
     if (userAddress) {
       const userMembership = await this.prisma.communityMember.findFirst({
         where: {
@@ -99,21 +99,21 @@ export class CommunitiesService {
           user_address: userAddress,
         },
       });
-      isJoined = !!userMembership;
+      is_joined = !!userMembership;
     }
 
     return {
-      communityAddress: community.community_address,
-      factoryAddress: community.factory_address || '',
+      community_address: community.community_address,
+      factory_address: community.factory_address || '',
       name: community.name,
       description: community.description || '',
-      creatorAddress: community.creator_address,
-      isHidden: community.is_hidden,
+      creator_address: community.creator_address,
+      is_hidden: community.is_hidden,
       blocktimestamp: new Date(Number(community.blocktimestamp.toString())),
-      totalBadges: community.total_badges,
-      totalMembers: membersCount,
+      total_badges: community.total_badges,
+      total_members: membersCount,
       managers: managers.map(manager => manager.user_address),
-      isJoined,
+      is_joined,
     };
   }
 
@@ -165,12 +165,12 @@ export class CommunitiesService {
     }
 
     return members.map(member => ({
-      userAddress: member.user_address,
-      isManager: member.is_manager,
-      isCreator: member.is_creator,
-      communityAddress: member.community_address,
+      user_address: member.user_address,
+      is_manager: member.is_manager,
+      is_creator: member.is_creator,
+      community_address: member.community_address,
       points: member.points,
-      lastIndexedAt: new Date(Number(member.last_indexed_at.toString())),
+      last_indexed_at: new Date(Number(member.last_indexed_at.toString())),
     }));
   }
 
@@ -189,13 +189,13 @@ export class CommunitiesService {
 
     const mappedBadges = badges.map(badge => ({
       issuer: badge.issuer,
-      communityAddress: badge.community_address,
+      community_address: badge.community_address,
       name: badge.name,
       score: badge.score,
       type: badge.type,
-      createdAt: badge.created_at ? new Date(Number(badge.created_at.toString())) : undefined,
-      removedAt: badge.removed_at ? new Date(Number(badge.removed_at.toString())) : undefined,
-      ...(user_address && { userHas: false })
+      created_at: badge.created_at ? new Date(Number(badge.created_at.toString())) : undefined,
+      removed_at: badge.removed_at ? new Date(Number(badge.removed_at.toString())) : undefined,
+      ...(user_address && { user_has: false })
     }));
 
     if (user_address) {
@@ -208,7 +208,7 @@ export class CommunitiesService {
       });
 
       mappedBadges.forEach(badge => {
-        badge.userHas = userBadges.some(ub => 
+        badge.user_has = userBadges.some(ub => 
           ub.name === badge.name && 
           ub.issuer === badge.issuer
         );
@@ -234,6 +234,7 @@ export class CommunitiesService {
 
     return communities;
   }
+  
   async findHiddenCommunities(userAddress: string) {
     const communities = await this.prisma.community.findMany({
       where: {
@@ -294,14 +295,14 @@ export class CommunitiesService {
     }
 
     return userBadges.map(badge => ({
-      userAddress: badge.user_address,
+      user_address: badge.user_address,
       issuer: badge.issuer,
-      communityAddress: badge.community_address,
+      community_address: badge.community_address,
       name: badge.name,
-      createdAt: badge.created_at ? new Date(Number(badge.created_at.toString())) : undefined,
-      badgeId: badge.badge_id,
-      communityId: badge.community_id,
-      communityMemberId: badge.community_member_id,
+      created_at: badge.created_at ? new Date(Number(badge.created_at.toString())) : undefined,
+      badge_id: badge.badge_id,
+      community_id: badge.community_id,
+      community_member_id: badge.community_member_id,
     }));
   }
 
