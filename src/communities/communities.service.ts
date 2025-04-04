@@ -164,12 +164,13 @@ export class CommunitiesService {
       );
     }
 
-    return members.map(member => ({
+    return members.map(async member => ({
       user_address: member.user_address,
       is_manager: member.is_manager,
       is_creator: member.is_creator,
       community_address: member.community_address,
       points: member.points,
+      badges_count: (await this.getUsersBadgeNumberAndPoints(member.user_address, communityAddress)).badges_count,
       last_indexed_at: new Date(Number(member.last_indexed_at.toString())),
     }));
   }
