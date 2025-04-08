@@ -17,6 +17,7 @@ describe('CommunitiesController', () => {
         'ccydnaovwshzuhdmxbpkpqhw4fh44p26ngvfayunpwpunwpsxapbaaaaaaaaaaaaaaa',
       name: 'Test Community',
       description: 'Test Description',
+      icon: 'https://example.com/icon.png',
       creator_address:
         'gbvnnpofvv2ynxsqxdjpbvqyy7wjlhgpmlxzlhbz3y6hlkxqgfbpbzry...',
       is_hidden: false,

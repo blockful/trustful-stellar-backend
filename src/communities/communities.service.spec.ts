@@ -14,6 +14,7 @@ describe('CommunitiesService', () => {
       'CCYDNAOVWSHZUHDMXBPXKPOHQW4FH44P26NGVFAYUNPWPUNWPSXAPBAAAAAAAAAAAAAAA',
     name: 'Test Community',
     description: 'Test Description',
+    icon: 'https://example.com/icon.png',
     creator_address: 'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
     is_hidden: false,
     blocktimestamp: { toString: () => '1625097600000' },
