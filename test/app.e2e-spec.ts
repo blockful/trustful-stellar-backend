@@ -48,25 +48,21 @@ describe('Communities (e2e)', () => {
           if (params?.where?.is_hidden === false) {
             return [mockCommunity];
           }
-          return [];
-        }),
-        findFirst: jest.fn().mockImplementation((params) => {
-          // Keep track of whether visibility was updated
-          if (params.where.community_address === mockCommunity.community_address) {
+          if (params?.where?.community_address === mockCommunity.community_address) {
             // Check if updateMany was called before this
             if (mockPrismaService.community.updateMany.mock.calls.length > 0) {
               // Return the community with updated visibility
-              return {
+              return [{
                 ...mockCommunity,
                 is_hidden: true,
-              };
+              }];
             }
-            return mockCommunity;
+            return [mockCommunity];
           }
-          if (params.where.community_address === hiddenCommunity.community_address) {
-            return hiddenCommunity;
+          if (params?.where?.community_address === hiddenCommunity.community_address) {
+            return [hiddenCommunity];
           }
-          return null;
+          return [];
         }),
         updateMany: jest.fn().mockImplementation((params) => {
           if (params.where.community_address === mockCommunity.community_address) {
