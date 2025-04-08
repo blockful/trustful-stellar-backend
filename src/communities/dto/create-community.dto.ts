@@ -28,6 +28,10 @@ export class CreateCommunityDto {
   @IsString()
   description: string;
 
+  @ApiProperty({ description: 'URL or path to the community icon', required: false })
+  @IsString()
+  icon?: string;
+
   @ApiProperty({ description: 'Stellar address of the community creator' })
   @IsNotEmpty()
   @IsString()
