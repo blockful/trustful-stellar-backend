@@ -19,7 +19,7 @@ export class BadgesController {
     type: [BadgeDto]
   })
   async getBadgesByType(@Param('type') type: string) {
-    return this.badgesService.findBadgesByType(type);
+    return this.badgesService.findBadgesByType(type.toLowerCase());
   }
 
   @Get('users/:user_address/communities/:community_address/badges')

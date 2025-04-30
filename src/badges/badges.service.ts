@@ -6,6 +6,17 @@ import { BadgeDto } from './dto/badge.dto';
 export class BadgesService {
   constructor(private prisma: PrismaService) {}
 
+  private async getAvailableTypes(): Promise<string[]> {
+    const types = await this.prisma.badge.findMany({
+      select: {
+        type: true
+      },
+      distinct: ['type']
+    });
+    
+    return types.map(t => t.type);
+  }
+
   async findBadgesByType(type: string) {
     const badges = await this.prisma.badge.findMany({
       where: {
@@ -14,10 +25,23 @@ export class BadgesService {
     });
 
     if (!badges.length) {
-      throw new NotFoundException(`No badges found with type ${type}`);
+      const availableTypes = await this.getAvailableTypes();
+      throw new NotFoundException(
+        `Type "${type}" not found. Available types are: ${availableTypes.join(', ')}`
+      );
     }
 
-    return badges;
+    const uniqueBadgesMap = new Map();
+    badges.forEach(badge => {
+      const key = `${badge.issuer}_${badge.name}`;
+      if (!uniqueBadgesMap.has(key)) {
+        uniqueBadgesMap.set(key, badge);
+      }
+    });
+
+    const uniqueBadges = Array.from(uniqueBadgesMap.values());
+
+    return uniqueBadges;
   }
 
   async returnCommunityBadgesThatTheUserHas(user_address: String, community_address: String){

@@ -13,6 +13,9 @@ describe('BadgesService', () => {
       findMany: jest.fn(),
       create: jest.fn(),
     },
+    userBadge: {
+      findMany: jest.fn(),
+    },
   };
 
   beforeEach(async () => {
@@ -35,28 +38,73 @@ describe('BadgesService', () => {
   });
 
   describe('findBadgesByType', () => {
-    it('should return badges when they exist', async () => {
+    beforeEach(() => {
+      mockPrismaService.badge.findMany.mockReset();
+    });
+
+    it('should return unique badges based on issuer and name', async () => {
       const mockBadges = [
-        { id: 1, type: 'achievement', name: 'First Win' },
-        { id: 2, type: 'achievement', name: 'Champion' },
+        { 
+          id: '1', 
+          type: 'achievement', 
+          name: 'SQL Master', 
+          issuer: 'issuer1',
+          community_address: 'community1',
+          score: 10
+        },
+        { 
+          id: '2', 
+          type: 'achievement', 
+          name: 'SQL Master', 
+          issuer: 'issuer1',
+          community_address: 'community2',
+          score: 10
+        },
+        { 
+          id: '3', 
+          type: 'achievement', 
+          name: 'SQL Master', 
+          issuer: 'issuer2',
+          community_address: 'community1',
+          score: 15
+        },
       ];
 
-      mockPrismaService.badge.findMany.mockResolvedValue(mockBadges);
+      mockPrismaService.badge.findMany.mockResolvedValueOnce(mockBadges);
 
       const result = await service.findBadgesByType('achievement');
 
-      expect(result).toEqual(mockBadges);
-      expect(prisma.badge.findMany).toHaveBeenCalledWith({
-        where: { type: 'achievement' },
-      });
+      expect(result).toHaveLength(2);
+      
+      const uniquePairs = new Set(result.map(badge => `${badge.issuer}_${badge.name}`));
+      expect(uniquePairs.size).toBe(2);
+
+      expect(result).toContainEqual(expect.objectContaining({
+        name: 'SQL Master',
+        issuer: 'issuer1'
+      }));
+
+      expect(result).toContainEqual(expect.objectContaining({
+        name: 'SQL Master',
+        issuer: 'issuer2'
+      }));
     });
 
-    it('should throw NotFoundException when no badges are found', async () => {
-      mockPrismaService.badge.findMany.mockResolvedValue([]);
+    it('should throw NotFoundException with available types when type is not found', async () => {
+      // Mock empty result for the requested type
+      mockPrismaService.badge.findMany
+        .mockResolvedValueOnce([]) // First call returns empty for the type search
+        .mockResolvedValueOnce([   // Second call returns available types
+          { type: 'achievement' },
+          { type: 'skill' },
+          { type: 'certification' }
+        ]);
 
-      await expect(service.findBadgesByType('nonexistent')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findBadgesByType('nonexistent'))
+        .rejects
+        .toThrow(new NotFoundException(
+          'Type "nonexistent" not found. Available types are: achievement, skill, certification'
+        ));
     });
   });
 });

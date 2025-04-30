@@ -30,16 +30,33 @@ describe('BadgesController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('findBadgesByType', () => {
-    it('should return badges of a specific type', async () => {
-      const mockBadges = [
-        { id: 1, type: 'achievement', name: 'First Win' },
-        { id: 2, type: 'achievement', name: 'Champion' },
-      ];
+  describe('getBadgesByType', () => {
+    const mockBadges = [
+      { id: '1', type: 'achievement', name: 'First Win' },
+      { id: '2', type: 'achievement', name: 'Champion' },
+    ];
 
+    beforeEach(() => {
+      mockBadgesService.findBadgesByType.mockReset();
       mockBadgesService.findBadgesByType.mockResolvedValue(mockBadges);
+    });
 
+    it('should return badges when type is lowercase', async () => {
       const result = await controller.getBadgesByType('achievement');
+
+      expect(result).toEqual(mockBadges);
+      expect(service.findBadgesByType).toHaveBeenCalledWith('achievement');
+    });
+
+    it('should return badges when type is uppercase', async () => {
+      const result = await controller.getBadgesByType('ACHIEVEMENT');
+
+      expect(result).toEqual(mockBadges);
+      expect(service.findBadgesByType).toHaveBeenCalledWith('achievement');
+    });
+
+    it('should return badges when type is mixed case', async () => {
+      const result = await controller.getBadgesByType('AchIeVeMeNt');
 
       expect(result).toEqual(mockBadges);
       expect(service.findBadgesByType).toHaveBeenCalledWith('achievement');
