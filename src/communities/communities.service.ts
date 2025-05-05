@@ -1,38 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCommunityDto } from './dto/create-community.dto';
-import { Community, Badge } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
+import { CommunitiesRepository } from './repository/communities.repository';
 
 @Injectable()
 export class CommunitiesService {
-  constructor(private prisma: PrismaService) { }
-
-  private async getLatestCommunities(communities: Community[]): Promise<Community[]> {
-    // Group communities by address and keep only the most recent version
-    const uniqueCommunities = communities.reduce((acc: Record<string, Community>, community) => {
-      if (!acc[community.community_address] || 
-          Number(community.last_indexed_at) >= Number(acc[community.community_address].last_indexed_at)) {
-        acc[community.community_address] = community;
-      }
-      return acc;
-    }, {});
-
-    return Object.values(uniqueCommunities);
-  }
-
-  private async getLatestBadges(badges: Badge[]): Promise<Badge[]> {
-    // Group badges by name and issuer and keep only the most recent version
-    const uniqueBadges = badges.reduce((acc: Record<string, Badge>, badge) => {
-      const key = `${badge.name}_${badge.issuer}`;
-      if (!acc[key] || 
-          Number(badge.created_at || 0) > Number(acc[key].created_at || 0)) {
-        acc[key] = badge;
-      }
-      return acc;
-    }, {});
-
-    return Object.values(uniqueBadges);
-  }
+  constructor(
+    private prisma: PrismaService,
+    private communitiesRepository: CommunitiesRepository
+  ) { }
 
   async findAll(userAddress?: string): Promise<CreateCommunityDto[]> {
     const communities = await this.prisma.community.findMany({
@@ -44,7 +21,7 @@ export class CommunitiesService {
       }
     });
 
-    const latestCommunities = await this.getLatestCommunities(communities);
+    const latestCommunities = await this.communitiesRepository.getLatestCommunities(communities);
 
     return Promise.all(
       latestCommunities.map(async (community) => {
@@ -53,28 +30,23 @@ export class CommunitiesService {
             community_address: community.community_address,
           },
         });
-        
-        const managers = await this.prisma.communityMember.findMany({
+        const allMembers = await this.prisma.communityMember.findMany({
           where: {
             community_address: community.community_address,
-            is_manager: true,
           },
-          select: {
-            user_address: true,
-          },
+          orderBy: {
+            last_indexed_at: 'desc'
+          }
         });
-
+        const latestMembers = await this.communitiesRepository.getLatestCommunityMembers(allMembers);
+        const managers = latestMembers.filter(member => member.is_manager);
         let is_joined = false;
         if (userAddress) {
-          const userMembership = await this.prisma.communityMember.findFirst({
-            where: {
-              community_address: community.community_address,
-              user_address: userAddress,
-            },
-          });
+          const userMembership = latestMembers.find(
+            member => member.user_address.toLowerCase() === userAddress.toLowerCase()
+          );
           is_joined = !!userMembership;
         }
-        
         return {
           community_address: community.community_address,
           factory_address: community.factory_address || '',
@@ -108,37 +80,29 @@ export class CommunitiesService {
         `Community with contract address ${communityAddress} not found`,
       );
     }
-
-    // Get the most recent version
     const community = communities[0];
-
     const membersCount = await this.prisma.communityMember.count({
       where: {
         community_address: communityAddress,
       },
     });
-
-    const managers = await this.prisma.communityMember.findMany({
+    const allMembers = await this.prisma.communityMember.findMany({
       where: {
         community_address: communityAddress,
-        is_manager: true,
       },
-      select: {
-        user_address: true,
-      },
+      orderBy: {
+        last_indexed_at: 'desc'
+      }
     });
-
+    const latestMembers = await this.communitiesRepository.getLatestCommunityMembers(allMembers);
+    const managers = latestMembers.filter(member => member.is_manager);
     let is_joined = false;
     if (userAddress) {
-      const userMembership = await this.prisma.communityMember.findFirst({
-        where: {
-          community_address: communityAddress,
-          user_address: userAddress,
-        },
-      });
+      const userMembership = latestMembers.find(
+        member => member.user_address.toLowerCase() === userAddress.toLowerCase()
+      );
       is_joined = !!userMembership;
     }
-
     return {
       community_address: community.community_address,
       factory_address: community.factory_address || '',
@@ -187,22 +151,23 @@ export class CommunitiesService {
   }
 
   async findMembers(communityAddress: string) {
-    const members = await this.prisma.communityMember.findMany({
+    const allMembers = await this.prisma.communityMember.findMany({
       where: {
         community_address: communityAddress
       },
       orderBy: {
-        points: 'desc'
+        last_indexed_at: 'desc'
       }
     });
 
-    if (!members.length) {
+    if (!allMembers.length) {
       throw new NotFoundException(
         `No members found for community ${communityAddress}`
       );
     }
-
-    return Promise.all(members.map(async member => ({
+    const latestMembers = await this.communitiesRepository.getLatestCommunityMembers(allMembers);
+    latestMembers.sort((a, b) => b.points - a.points);
+    return Promise.all(latestMembers.map(async member => ({
       user_address: member.user_address,
       is_manager: member.is_manager,
       is_creator: member.is_creator,
@@ -229,7 +194,7 @@ export class CommunitiesService {
       );
     }
 
-    const latestBadges = await this.getLatestBadges(badges);
+    const latestBadges = await this.communitiesRepository.getLatestBadges(badges);
 
     const mappedBadges = latestBadges.map(badge => ({
       issuer: badge.issuer,
@@ -279,7 +244,7 @@ export class CommunitiesService {
       }
     });
 
-    return this.getLatestCommunities(communities);
+    return this.communitiesRepository.getLatestCommunities(communities);
   }
   
   async findHiddenCommunities(userAddress: string) {
@@ -293,32 +258,43 @@ export class CommunitiesService {
       }
     });
 
-    return this.getLatestCommunities(communities);
+    return this.communitiesRepository.getLatestCommunities(communities);
   }
 
   async findJoinnedCommunities(userAddress: string) {
-    const communitiesAddresses = await this.prisma.communityMember.findMany({
+    const allMemberships = await this.prisma.communityMember.findMany({
       where: {
         user_address: userAddress
       },
-      select: {
-        community_address: true
+      orderBy: {
+        last_indexed_at: 'desc'
       }
     });
+    const uniqueCommunities = new Map<string, string>();
+    const latestMemberships = [];
+    
+    for (const membership of allMemberships) {
+      if (!uniqueCommunities.has(membership.community_address)) {
+        uniqueCommunities.set(membership.community_address, membership.community_address);
+        latestMemberships.push(membership);
+      }
+    }
+    
+    const communityAddresses = latestMemberships.map(m => m.community_address);
 
     const badges_by_community = new Map<string, number>();
     const points_by_community = new Map<string, number>();
 
-    for (const community of communitiesAddresses) {
-      const { badges_count, points } = await this.getUsersBadgeNumberAndPoints(userAddress, community.community_address);
-      badges_by_community.set(community.community_address, badges_count);
-      points_by_community.set(community.community_address, points);
+    for (const communityAddress of communityAddresses) {
+      const { badges_count, points } = await this.getUsersBadgeNumberAndPoints(userAddress, communityAddress);
+      badges_by_community.set(communityAddress, badges_count);
+      points_by_community.set(communityAddress, points);
     }
 
     const communities = await this.prisma.community.findMany({
       where: {
         community_address: {
-          in: communitiesAddresses.map(community => community.community_address)
+          in: communityAddresses
         }
       },
       orderBy: {
@@ -326,7 +302,7 @@ export class CommunitiesService {
       }
     });
 
-    const latestCommunities = await this.getLatestCommunities(communities);
+    const latestCommunities = await this.communitiesRepository.getLatestCommunities(communities);
 
     return latestCommunities.map(community => ({
       ...community,
@@ -367,19 +343,20 @@ export class CommunitiesService {
           community_address: community_address
         }
       });
-
-      const points = await this.prisma.communityMember.findMany({
+      const communityMembers = await this.prisma.communityMember.findMany({
         where: {
           user_address: userAddress,
           community_address: community_address
         },
-        take: 1
+        orderBy: {
+          last_indexed_at: 'desc'
+        }
       });
+      const latestMember = communityMembers.length > 0 ? communityMembers[0] : null;
 
       return { 
         badges_count: user_badges.length, 
-        points: points[0]?.points || 0 
+        points: latestMember?.points || 0 
       };
   }
-
 }

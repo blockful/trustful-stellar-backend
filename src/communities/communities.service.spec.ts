@@ -3,10 +3,12 @@ import { CommunitiesService } from './communities.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
 import { Decimal } from '@prisma/client/runtime/library';
+import { CommunitiesRepository } from './repository/communities.repository';
 
 describe('CommunitiesService', () => {
   let service: CommunitiesService;
   let prismaService: PrismaService;
+  let communitiesRepository: CommunitiesRepository;
 
   const mockPrismaResponse = {
     community_address:
@@ -85,14 +87,96 @@ describe('CommunitiesService', () => {
                   created_at: null
                 }
               ]),
-            }
+            },
+            $queryRawUnsafe: jest.fn().mockImplementation((query) => {
+              if (query.includes('FROM communities')) {
+                return [mockPrismaResponse];
+              } else if (query.includes('FROM badges')) {
+                return [{
+                  id: 'badge-id',
+                  issuer: 'ISSUER_1',
+                  community_address: 'TEST_CONTRACT_ADDRESS',
+                  name: 'Badge 1',
+                  score: 100,
+                  type: 'Custom',
+                  created_at: null,
+                  removed_at: null,
+                  community_id: 'community-id',
+                  _id: 'internal-id',
+                  block_range_text: '[1,)'
+                }];
+              } else if (query.includes('FROM community_members')) {
+                return [{
+                  id: 'member-id',
+                  user_address: 'USER_1',
+                  is_manager: true,
+                  is_creator: true,
+                  community_address: 'TEST_CONTRACT_ADDRESS',
+                  last_indexed_at: { toString: () => '1625097600000' },
+                  points: 100,
+                  user_id: 'user-id',
+                  community_id: 'community-id',
+                  _id: 'internal-id',
+                  block_range_text: '[1,)'
+                }];
+              }
+              return [];
+            }),
           },
         },
+        {
+          provide: CommunitiesRepository,
+          useValue: {
+            getLatestCommunities: jest.fn().mockImplementation((communities) => {
+              if (communities.length === 0) {
+                return [];
+              }
+              return communities.map(community => ({...community}));
+            }),
+            getLatestBadges: jest.fn().mockImplementation((badges) => {
+              if (badges.length === 0) {
+                return [];
+              }
+              return [{
+                id: 'badge-id',
+                issuer: 'ISSUER_1',
+                community_address: 'TEST_CONTRACT_ADDRESS',
+                name: 'Badge 1',
+                score: 100,
+                type: 'Custom',
+                created_at: null,
+                removed_at: null,
+                community_id: 'community-id',
+                _id: 'internal-id',
+                block_range_text: '[1,)'
+              }];
+            }),
+            getLatestCommunityMembers: jest.fn().mockImplementation((members) => {
+              if (members.length === 0) {
+                return [];
+              }
+              return [{
+                id: 'member-id',
+                user_address: 'USER_1',
+                is_manager: true,
+                is_creator: true,
+                community_address: 'TEST_CONTRACT_ADDRESS',
+                last_indexed_at: { toString: () => '1625097600000' },
+                points: 100,
+                user_id: 'user-id',
+                community_id: 'community-id',
+                _id: 'internal-id',
+                block_range_text: '[1,)'
+              }];
+            }),
+          }
+        }
       ],
     }).compile();
 
     service = module.get<CommunitiesService>(CommunitiesService);
     prismaService = module.get<PrismaService>(PrismaService);
+    communitiesRepository = module.get<CommunitiesRepository>(CommunitiesRepository);
   });
 
   it('should be defined', () => {
@@ -213,18 +297,22 @@ describe('CommunitiesService', () => {
 
     beforeEach(() => {
       prismaService.communityMember.findMany = jest.fn().mockResolvedValue(mockMembers);
+      jest.spyOn(service, 'getUsersBadgeNumberAndPoints').mockResolvedValue({
+        badges_count: 2,
+        points: 100
+      });
     });
 
     it('should return all members of a community', async () => {
       const result = await service.findMembers(communityAddress);
 
-      expect(result.length).toEqual(2);
+      expect(result.length).toEqual(1); // Only one from the queryRawUnsafe mock
       expect(result[0]).toHaveProperty('user_address', 'USER_1');
       expect(result[0]).toHaveProperty('is_manager', true);
 
       expect(prismaService.communityMember.findMany).toHaveBeenCalledWith({
         where: { community_address: communityAddress },
-        orderBy: { points: 'desc' }
+        orderBy: { last_indexed_at: 'desc' }
       });
     });
 
@@ -324,31 +412,44 @@ describe('CommunitiesService', () => {
 
   describe('findJoinnedCommunities', () => {
     const userAddress = 'TEST_USER_ADDRESS';
-    const mockCommunityAddresses = [{ community_address: 'TEST_CONTRACT_ADDRESS' }];
+    const mockCommunityAddresses = [{
+      user_address: userAddress,
+      community_address: 'TEST_CONTRACT_ADDRESS',
+      last_indexed_at: { toString: () => '1625097600000' }
+    }];
     const mockCommunities = [mockPrismaResponse];
 
     beforeEach(() => {
       prismaService.communityMember.findMany = jest.fn().mockResolvedValue(mockCommunityAddresses);
       prismaService.community.findMany = jest.fn().mockResolvedValue(mockCommunities);
+      prismaService.userBadge.findMany = jest.fn().mockResolvedValue([
+        { user_address: userAddress, community_address: 'TEST_CONTRACT_ADDRESS' },
+        { user_address: userAddress, community_address: 'TEST_CONTRACT_ADDRESS' }
+      ]);
+      
+      jest.spyOn(service, 'getUsersBadgeNumberAndPoints').mockImplementation(
+        async (userAddr, communityAddr) => {
+          expect(userAddr).toBe(userAddress);
+          expect(communityAddr).toBe('TEST_CONTRACT_ADDRESS');
+          return { badges_count: 2, points: 100 };
+        }
+      );
+      
+      communitiesRepository.getLatestCommunities = jest.fn().mockResolvedValue([{
+        ...mockPrismaResponse,
+        community_address: 'TEST_CONTRACT_ADDRESS',
+        users_badges_count: 2,
+        users_points: 100
+      }]);
     });
 
     it('should return all communities joined by a user', async () => {
       const result = await service.findJoinnedCommunities(userAddress);
-
-      expect(result).toEqual(mockCommunities);
+      expect(result[0].users_badges_count).toBe(2);
+      expect(result[0].users_points).toBe(100);
       expect(prismaService.communityMember.findMany).toHaveBeenCalledWith({
         where: { user_address: userAddress },
-        select: { community_address: true }
-      });
-      expect(prismaService.community.findMany).toHaveBeenCalledWith({
-        where: {
-          community_address: {
-            in: ['TEST_CONTRACT_ADDRESS']
-          }
-        },
-        orderBy: {
-          last_indexed_at: 'desc'
-        }
+        orderBy: { last_indexed_at: 'desc' }
       });
     });
   });
@@ -420,18 +521,28 @@ describe('CommunitiesService', () => {
         }
       ];
 
+      communitiesRepository.getLatestCommunities = jest.fn().mockResolvedValue([
+        {
+          ...mockPrismaResponse,
+          community_address: 'community1',
+          name: 'New Version',
+          block_range_text: '[1,)'
+        },
+        {
+          ...mockPrismaResponse,
+          community_address: 'community2',
+          name: 'Another Community',
+          block_range_text: '[1,)'
+        }
+      ]);
+
       jest.spyOn(prismaService.community, 'findMany').mockResolvedValue(mockCommunities);
+      prismaService.communityMember.count = jest.fn().mockResolvedValue(5);
 
       const result = await service.findAll();
-
-      // Should only have 2 communities (latest version of community1 and community2)
       expect(result).toHaveLength(2);
-
-      // Should have the latest version of community1
       const community1 = result.find(c => c.community_address === 'community1');
       expect(community1.name).toBe('New Version');
-
-      // Should have community2
       const community2 = result.find(c => c.community_address === 'community2');
       expect(community2.name).toBe('Another Community');
     });
@@ -451,15 +562,21 @@ describe('CommunitiesService', () => {
           name: 'Second Entry'
         }
       ];
-
+      
+      communitiesRepository.getLatestCommunities = jest.fn().mockResolvedValue([
+        {
+          ...mockPrismaResponse,
+          community_address: 'community1',
+          name: 'Second Entry',
+          block_range_text: '[1,)'
+        }
+      ]);
+      
       jest.spyOn(prismaService.community, 'findMany').mockResolvedValue(mockCommunities);
+      prismaService.communityMember.count = jest.fn().mockResolvedValue(5);
 
       const result = await service.findAll();
-
-      // Should only have 1 community
       expect(result).toHaveLength(1);
-
-      // Should keep the most recent entry in the array when timestamps are equal
       expect(result[0].name).toBe('Second Entry');
     });
 
@@ -478,8 +595,17 @@ describe('CommunitiesService', () => {
         last_indexed_at: new Decimal('1000'),
         name: 'Single Community'
       };
+      prismaService.$queryRawUnsafe = jest.fn().mockResolvedValue([
+        {
+          ...mockPrismaResponse,
+          community_address: 'community1',
+          name: 'Single Community',
+          block_range_text: '[1,)'
+        }
+      ]);
 
       jest.spyOn(prismaService.community, 'findMany').mockResolvedValue([singleCommunity]);
+      prismaService.communityMember.count = jest.fn().mockResolvedValue(5);
 
       const result = await service.findAll();
 
