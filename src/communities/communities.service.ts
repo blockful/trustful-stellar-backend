@@ -173,8 +173,11 @@ export class CommunitiesService {
     }
 
     const latestBadges = await this.communitiesRepository.getLatestBadges(badges);
+    
+    // Filter out badges that have been removed
+    const activeBadges = latestBadges.filter(badge => !badge.removed_at);
 
-    const mappedBadges = latestBadges.map(badge => ({
+    const mappedBadges = activeBadges.map(badge => ({
       issuer: badge.issuer,
       community_address: badge.community_address,
       name: badge.name,
@@ -204,12 +207,12 @@ export class CommunitiesService {
       return {
         badges_count,
         users_points: points,
-        total_badges: latestBadges.length,
+        total_badges: activeBadges.length,
         community_badges: mappedBadges
       };
     }
 
-    return { total_badges: latestBadges.length, community_badges: mappedBadges };
+    return { total_badges: activeBadges.length, community_badges: mappedBadges };
   }
 
   async findCreatedCommunities(userAddress: string) {
