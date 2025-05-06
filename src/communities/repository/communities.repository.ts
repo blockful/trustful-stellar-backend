@@ -74,4 +74,66 @@ export class CommunitiesRepository {
     
     return latestMembers || [];
   }
+
+  async countValidCommunityMembers(communityAddress: string): Promise<number> {
+    const result = await this.prisma.$queryRawUnsafe<[{count: string}]>(`
+      SELECT COUNT(*) as count 
+      FROM community_members 
+      WHERE community_address = '${communityAddress}'
+      AND upper_inf(_block_range) = true
+      AND is_member = true
+    `);
+    
+    return Number(result[0].count);
+  }
+
+  async getValidCommunityMembers(communityAddress: string): Promise<any[]> {
+    const validMembers = await this.prisma.$queryRawUnsafe<any[]>(`
+      SELECT 
+        id, user_address, is_manager, is_creator, community_address, 
+        last_indexed_at, points, user_id, community_id, _id, is_member,
+        _block_range::text as block_range_text
+      FROM community_members 
+      WHERE community_address = '${communityAddress}'
+      AND upper_inf(_block_range) = true
+      AND is_member = true
+      ORDER BY last_indexed_at DESC
+    `);
+    
+    return validMembers || [];
+  }
+
+  async getValidUserMemberships(userAddress: string): Promise<any[]> {
+    const validMemberships = await this.prisma.$queryRawUnsafe<any[]>(`
+      SELECT 
+        id, user_address, is_manager, is_creator, community_address, 
+        last_indexed_at, points, user_id, community_id, _id, is_member,
+        _block_range::text as block_range_text
+      FROM community_members 
+      WHERE user_address = '${userAddress}'
+      AND upper_inf(_block_range) = true
+      AND is_member = true
+      ORDER BY last_indexed_at DESC
+    `);
+    
+    return validMemberships || [];
+  }
+
+  async getValidUserMemberInCommunity(userAddress: string, communityAddress: string): Promise<any | null> {
+    const validMember = await this.prisma.$queryRawUnsafe<any[]>(`
+      SELECT 
+        id, user_address, is_manager, is_creator, community_address, 
+        last_indexed_at, points, user_id, community_id, _id, is_member,
+        _block_range::text as block_range_text
+      FROM community_members 
+      WHERE user_address = '${userAddress}'
+      AND community_address = '${communityAddress}'
+      AND upper_inf(_block_range) = true
+      AND is_member = true
+      ORDER BY last_indexed_at DESC
+      LIMIT 1
+    `);
+    
+    return validMember && validMember.length > 0 ? validMember[0] : null;
+  }
 } 
