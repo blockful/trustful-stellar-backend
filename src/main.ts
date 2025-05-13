@@ -8,18 +8,9 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: [
-      'https://trustful-stellar-mainet.trust.ful.xyz',
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
-      // Add any other frontend domains that need access
-    ],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    origin: true, // Você pode substituir por um array de origens permitidas
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
-    allowedHeaders: 'Content-Type, Accept, Authorization',
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
   });
 
   app.useGlobalPipes(new ValidationPipe());
