@@ -136,4 +136,18 @@ export class CommunitiesRepository {
     
     return validMember && validMember.length > 0 ? validMember[0] : null;
   }
+
+  async getCommunitiesWhereUserIsManager(userAddress: string): Promise<string[]> {
+    const result = await this.prisma.$queryRawUnsafe<{community_address: string}[]>(`
+      SELECT DISTINCT community_address 
+      FROM community_members 
+      WHERE user_address = '${userAddress}'
+      AND is_manager = true
+      AND upper_inf(_block_range) = true
+      AND is_member = true
+      ORDER BY community_address
+    `);
+    
+    return result.map(r => r.community_address);
+  }
 } 

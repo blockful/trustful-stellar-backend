@@ -218,6 +218,26 @@ export class CommunitiesController {
     return this.communitiesService.findCreatedCommunities(toLowerCaseAddress(user_address));
   }
 
+  @Get('managed/:user_address')
+  @ApiOperation({
+    summary: 'Get managed communities',
+    description: 'Retrieves all communities where the user is a manager (includes created communities since creators are automatically managers)'
+  })
+  @ApiParam({
+    name: 'user_address',
+    description: 'Stellar address of the user',
+    example: 'GBVNNPOFVV2YNXSQXDJPBVQYY7WJLHGPMLXZLHBZ3Y6HLKXQGFBPBZRY',
+    required: true
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of managed communities retrieved successfully',
+    type: [CreateCommunityDto]
+  })
+  async getManagedCommunities(@Param('user_address') user_address: string) {
+    return this.communitiesService.findManagedCommunities(toLowerCaseAddress(user_address));
+  }
+
   @Get('hidden/:user_address')
   @ApiOperation({
     summary: 'Get hidden communities',

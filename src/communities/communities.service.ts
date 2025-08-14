@@ -227,6 +227,27 @@ export class CommunitiesService {
 
     return this.communitiesRepository.getLatestCommunities(communities);
   }
+
+  async findManagedCommunities(userAddress: string) {
+    const managedCommunityAddresses = await this.communitiesRepository.getCommunitiesWhereUserIsManager(userAddress);
+    
+    if (!managedCommunityAddresses.length) {
+      return [];
+    }
+
+    const communities = await this.prisma.community.findMany({
+      where: {
+        community_address: {
+          in: managedCommunityAddresses
+        }
+      },
+      orderBy: {
+        last_indexed_at: 'desc'
+      }
+    });
+
+    return this.communitiesRepository.getLatestCommunities(communities);
+  }
   
   async findHiddenCommunities(userAddress: string) {
     const communities = await this.prisma.community.findMany({
